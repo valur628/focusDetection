@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">focusDetection</string>
+    <string name="no_camera_access" translatable="false">권한 좀 주시옵소서.</string>
+</resources>
