@@ -225,8 +225,8 @@ public class MainActivity extends AppCompatActivity {
                                 eye_open = false;
                             }
                         }
-                        if((-0.45 > leftRatioMeasurement_side1 || leftRatioMeasurement_side1 > 0.35)
-                                && (-0.35  > rightRatioMeasurement_side1 || rightRatioMeasurement_side1 > 0.45)){
+                        if((-0.30 > leftRatioMeasurement_side1 || leftRatioMeasurement_side1 > 0.30)
+                                && (-0.30  > rightRatioMeasurement_side1 || rightRatioMeasurement_side1 > 0.30)){
                             if(eye_sided){
                                 tv3.setText("Eye is sided");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
