@@ -9,9 +9,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.SurfaceTexture;
-import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.util.Size;
@@ -93,21 +90,36 @@ public class MainActivity extends AppCompatActivity {
     // 눈 깜빡임용 비율 계산에 쓰일 포인트 변수 (왼쪽, 오른쪽)
     private float leftRatioMeasurement_blink, rightRatioMeasurement_blink;
     // 눈 비율 계산값 변수
-    private boolean eye_blinked, eye_open;
+    private boolean eye_blink, eye_open;
     //양쪽 눈 감았는지 여부
 
-    private float leftEyePoint_side_1, leftEyePoint_side_2, leftEyePoint_side_3;
+    private float leftIrisPoint_side_1, leftIrisPoint_side_2, leftIrisPoint_side_3;
     //왼쪽 눈 좌우용 랜드마크 포인트
-    private float rightEyePoint_side_1, rightEyePoint_side_2, rightEyePoint_side_3;
+    private float rightIrisPoint_side_1, rightIrisPoint_side_2, rightIrisPoint_side_3;
     //오른쪽 눈 좌우용 랜드마크 포인트
-    private float leftRatioMeasurement_side1, leftRatioMeasurement_side2, rightRatioMeasurement_side1, rightRatioMeasurement_side2;
+    private float leftRatioMeasurement_corner1, leftRatioMeasurement_corner2, rightRatioMeasurement_corner1, rightRatioMeasurement_corner2;
     // 눈 비율 계산값 변수
-    private boolean eye_sided, eye_center;
+    private boolean iris_corner, iris_center;
     //양쪽 눈 틀어졌는지 여부
+
+    private float leftCheekPoint_side_1, rightCheekPoint_side_1;
+    //고개 좌우 판별용 뺨 랜드마크 포인트
+    private float cheekRatioMeasurement_side;
+    //고개 좌우 판별 뺨 변수
+    private float centerHeadPoint_angle_x, centerHeadPoint_angle_z;
+    //고개 좌우 각도용 코 랜드마크 포인트
+    private float centerForeheadPoint_angle_x, centerForeheadPoint_angle_z;
+    //고개 좌우 각도용 이마 랜드마크 포인트
+    private boolean head_side, head_middle;
+    //고개 돌아갔는지 틀어졌는지 여부
+
+    Point ap1 = new Point();
+    Point ap2 = new Point();
+    Point ap3 = new Point();
+    private float apResult;
 
     class Point {
         float x;
-        float y;
         float z;
     }
 
@@ -116,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
         tv = findViewById(R.id.tv);
-        tv2 = findViewById(R.id.tv2);
-        tv3 = findViewById(R.id.tv3);
-        tv4 = findViewById(R.id.tv4);
-        tv5 = findViewById(R.id.tv5);
+        tv2 = findViewById(R.id.tv5);
+        tv3 = findViewById(R.id.tv2);
+        tv4 = findViewById(R.id.tv3);
+        tv5 = findViewById(R.id.tv4);
         //tv.setText("000");
         try {
             applicationInfo =
@@ -161,10 +173,16 @@ public class MainActivity extends AppCompatActivity {
         processor.setInputSidePackets(inputSidePackets);
         //tv.setText("999");
 
-        eye_blinked = true;
+        eye_blink = true;
         eye_open = true;
-        eye_sided = true;
-        eye_center = true;
+        iris_corner = true;
+        iris_center = true;
+        head_side = true;
+        head_middle = true;
+        ap1.x = 540f;
+        ap1.z = 0f;
+        ap3.x = 540f;
+        ap3.z = 1080f;
         //tv.setText("00000");
 
         // To show verbose logging, run:
@@ -182,81 +200,155 @@ public class MainActivity extends AppCompatActivity {
                                 PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
 
                         //tv.setText("33333");
-                        ratioPoint_1a = multiFaceLandmarks.get(0).getLandmarkList().get(5).getY()*1920f;
-                        ratioPoint_1b = multiFaceLandmarks.get(0).getLandmarkList().get(4).getY()*1920f;
+                        ratioPoint_1a = multiFaceLandmarks.get(0).getLandmarkList().get(5).getY() * 1920f;
+                        ratioPoint_1b = multiFaceLandmarks.get(0).getLandmarkList().get(4).getY() * 1920f;
 
                         //tv.setText("44444");
-                        leftEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(386).getY()*1920f;
-                        leftEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(373).getY()*1920f;
-                        rightEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(159).getY()*1920f;
-                        rightEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(144).getY()*1920f;
+                        leftEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(386).getY() * 1920f;
+                        leftEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(373).getY() * 1920f;
+                        rightEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(159).getY() * 1920f;
+                        rightEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(144).getY() * 1920f;
 
                         //tv.setText("55555");
                         leftRatioMeasurement_blink = (leftEyePoint_blink_2 - leftEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
                         rightRatioMeasurement_blink = (rightEyePoint_blink_2 - rightEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
 
-                        ratioPoint_2a = multiFaceLandmarks.get(0).getLandmarkList().get(275).getY()*1080f;
-                        ratioPoint_2b = multiFaceLandmarks.get(0).getLandmarkList().get(45).getY()*1080f;
+                        ratioPoint_2a = multiFaceLandmarks.get(0).getLandmarkList().get(275).getY() * 1080f;
+                        ratioPoint_2b = multiFaceLandmarks.get(0).getLandmarkList().get(45).getY() * 1080f;
 
-                        leftEyePoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(374).getX()*1080f;
-                        leftEyePoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(475).getX()*1080f;
-                        leftEyePoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(263).getX()*1080f;
+                        leftIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(374).getX() * 1080f;
+                        leftIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(475).getX() * 1080f;
+                        leftIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(263).getX() * 1080f;
 
-                        rightEyePoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(145).getX()*1080f;
-                        rightEyePoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(470).getX()*1080f;
-                        rightEyePoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*1080f;
-                        leftRatioMeasurement_side1 = (leftEyePoint_side_2 - leftEyePoint_side_1) / (ratioPoint_1b - ratioPoint_1a); // (ratioPoint_2a - ratioPoint_2b);
-                        leftRatioMeasurement_side2 = (leftEyePoint_side_3 - leftEyePoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
+                        rightIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(145).getX() * 1080f;
+                        rightIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(470).getX() * 1080f;
+                        rightIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(133).getX() * 1080f;
 
-                        /*
-                        rightRatioMeasurement_side1 = (rightEyePoint_side_2 - rightEyePoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
-                        rightRatioMeasurement_side2 = (rightEyePoint_side_3 - rightEyePoint_side_2) / (ratioPoint_1b - ratioPoint_1a);*/
+                        leftRatioMeasurement_corner1 = (leftIrisPoint_side_2 - leftIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a); // (ratioPoint_2a - ratioPoint_2b);
+                        leftRatioMeasurement_corner2 = (leftIrisPoint_side_3 - leftIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
-                        rightRatioMeasurement_side1 = (multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f - multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f) / (ratioPoint_1b - ratioPoint_1a);
-                        rightRatioMeasurement_side2 = (multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f - multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f);
+                        rightRatioMeasurement_corner1 = (rightIrisPoint_side_2 - rightIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
+                        rightRatioMeasurement_corner2 = (rightIrisPoint_side_3 - rightIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
-                        tv.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ());
-                        tv5.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f);
-                        tv3.setText(rightRatioMeasurement_side1 + " = minus / normal = " + rightRatioMeasurement_side2);
-                        //tv4.setText(multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*1920f + " = X1920 / X_height = " + multiFaceLandmarks.get(0).getLandmarkList().get(133).getZ()*height);
-                       // tv2.setText(multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*2220f + " = X2220 / Z1000 = " + multiFaceLandmarks.get(0).getLandmarkList().get(133).getZ()*1000f);
-                        /*tv2.setText(leftRatioMeasurement_blink + " = LEFT Blink RIGHT = " + rightRatioMeasurement_blink);
-                        tv5.setText(leftRatioMeasurement_side1 + " = LEFT Side RIGHT = " + rightRatioMeasurement_side1);*/
-                        /*if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
-                            if(eye_blinked){
-                                tv.setText("Eye is blinked");
+
+                        rightCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() * 1080f;
+                        leftCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ() * 1080f;
+                        cheekRatioMeasurement_side = (rightCheekPoint_side_1 - leftCheekPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
+
+                        centerHeadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(4).getX() * 1080f;
+                        centerHeadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(4).getZ() * 1080f);
+
+                        centerForeheadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(9).getX() * 1080f;
+                        centerForeheadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(9).getZ() * 1080f);
+
+                        ap2.x = centerHeadPoint_angle_x;
+                        ap2.z = centerHeadPoint_angle_z;
+
+                        if (cheekRatioMeasurement_side >= 0f) {
+                            if (centerForeheadPoint_angle_x >= 0f && centerForeheadPoint_angle_x <= 270f) {
+                                ap1.x = 270f;
+                                ap3.x = 270f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x <= 540f) {
+                                ap1.x = 540f;
+                                ap3.x = 540f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x <= 810f) {
+                                ap1.x = 810f;
+                                ap3.x = 810f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x <= 1080f) {
+                                ap1.x = 1080f;
+                                ap3.x = 1080f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else {
+                                apResult = -1f;
+                            }
+                        }
+                        else if(cheekRatioMeasurement_side < 0f){
+                            if (centerForeheadPoint_angle_x <= 1080f && centerForeheadPoint_angle_x >= 810f) {
+                                ap1.x = 810f;
+                                ap3.x = 810f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x >= 540f) {
+                                ap1.x = 540f;
+                                ap3.x = 540f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x >= 270f) {
+                                ap1.x = 270f;
+                                ap3.x = 270f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else if (centerForeheadPoint_angle_x >= 0f) {
+                                ap1.x = 0f;
+                                ap3.x = 0f;
+                                apResult = getLandmarksAngle(ap1, ap2, ap3);
+                            } else {
+                                apResult = -1f;
+                            }
+                        }
+                        //180이 최대값
+
+                        /*tv.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ());
+                        tv5.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() * 1080f + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ() * 1080f);
+                        tv3.setText(cheekRatioMeasurement_side + " = minus");
+                        tv4.setText(apResult + " = apResult");
+                        tv2.setText(centerHeadPoint_angle_x + " = X angle Z = " + centerHeadPoint_angle_z);*/
+
+                        if((apResult <= 130f && (cheekRatioMeasurement_side >= 5.5f || cheekRatioMeasurement_side <= -5.5f))
+                                || (cheekRatioMeasurement_side >= 7f || cheekRatioMeasurement_side <= -7f)){
+                            if(head_side){
+                                tv3.setText("고개가 돌아가 있습니다.");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
-                                eye_blinked = false;
+                                head_side = false;
+                                head_middle = true;
+                            }
+                        }
+                        else{
+                            if(head_middle)
+                            {
+                                tv3.setText("고개가 중앙에 있습니다.");
+                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
+                                head_side = true;
+                                head_middle = false;
+                            }
+                        }
+
+                        if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
+                            if(eye_blink){
+                                tv2.setText("눈이 감겨 있습니다.");
+                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
+                                eye_blink = false;
                                 eye_open = true;
                             }
                         }
                         else{
                             if(eye_open)
                             {
-                                tv.setText("Eye is open");
+                                tv2.setText("눈이 떠져 있습니다.");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
-                                eye_blinked = true;
+                                eye_blink = true;
                                 eye_open = false;
                             }
                         }
-                        if((-0.30 > leftRatioMeasurement_side1 || leftRatioMeasurement_side1 > 0.30)
-                                && (-0.30  > rightRatioMeasurement_side1 || rightRatioMeasurement_side1 > 0.30)){
-                            if(eye_sided){
-                                tv3.setText("Eye is sided");
+
+                        if((-0.30 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.30)
+                                && (-0.30  > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.30)){
+                            if(iris_corner){
+                                tv.setText("눈동자가 한 쪽으로 쏠렸습니다.");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
-                                eye_sided = false;
-                                eye_center = true;
+                                iris_corner = false;
+                                iris_center = true;
                             }
                         }
                         else{
-                            if(eye_center)
+                            if(iris_center)
                             {
-                                tv3.setText("Eye is center");
+                                tv.setText("눈동자가 가운데에 있습니다.");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
-                                eye_sided = true;
-                                eye_center = false;
+                                iris_corner = true;
+                                iris_center = false;
                             }
-                        }*/
+                        }
           /*Log.v(
               TAG,
               "[TS:"
@@ -401,11 +493,11 @@ public class MainActivity extends AppCompatActivity {
         return multiFaceLandmarksStr;
     }
 
-    public static float getLandmarksAngle(Point p1, Point p2, Point p3){
+    public static float getLandmarksAngle(Point p1, Point p2, Point p3) {
         float p1_2 = (float) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.z - p2.z, 2));
         float p2_3 = (float) Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.z - p3.z, 2));
         float p3_1 = (float) Math.sqrt(Math.pow(p3.x - p1.x, 2) + Math.pow(p3.z - p1.z, 2));
-        float radian = (float) Math.acos((p1_2*p1_2 + p2_3*p2_3 - p3_1*p3_1) / (2 * p1_2 * p2_3));
+        float radian = (float) Math.acos((p1_2 * p1_2 + p2_3 * p2_3 - p3_1 * p3_1) / (2 * p1_2 * p2_3));
         float degree = (float) (radian / Math.PI * 180);
         return degree;
     }
