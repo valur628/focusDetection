@@ -105,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean eye_sided, eye_center;
     //양쪽 눈 틀어졌는지 여부
 
+    class Point {
+        float x;
+        float y;
+        float z;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,16 +205,24 @@ public class MainActivity extends AppCompatActivity {
                         rightEyePoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(145).getX()*1080f;
                         rightEyePoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(470).getX()*1080f;
                         rightEyePoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*1080f;
-
                         leftRatioMeasurement_side1 = (leftEyePoint_side_2 - leftEyePoint_side_1) / (ratioPoint_1b - ratioPoint_1a); // (ratioPoint_2a - ratioPoint_2b);
                         leftRatioMeasurement_side2 = (leftEyePoint_side_3 - leftEyePoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
+                        /*
                         rightRatioMeasurement_side1 = (rightEyePoint_side_2 - rightEyePoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
-                        rightRatioMeasurement_side2 = (rightEyePoint_side_3 - rightEyePoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
+                        rightRatioMeasurement_side2 = (rightEyePoint_side_3 - rightEyePoint_side_2) / (ratioPoint_1b - ratioPoint_1a);*/
 
-                        tv2.setText(leftRatioMeasurement_blink + " = LEFT Blink RIGHT = " + rightRatioMeasurement_blink);
-                        tv5.setText(leftRatioMeasurement_side1 + " = LEFT Side RIGHT = " + rightRatioMeasurement_side1);
-                        if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
+                        rightRatioMeasurement_side1 = (multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f - multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f) / (ratioPoint_1b - ratioPoint_1a);
+                        rightRatioMeasurement_side2 = (multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f - multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f);
+
+                        tv.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ());
+                        tv5.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ()*1080f + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ()*1080f);
+                        tv3.setText(rightRatioMeasurement_side1 + " = minus / normal = " + rightRatioMeasurement_side2);
+                        //tv4.setText(multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*1920f + " = X1920 / X_height = " + multiFaceLandmarks.get(0).getLandmarkList().get(133).getZ()*height);
+                       // tv2.setText(multiFaceLandmarks.get(0).getLandmarkList().get(133).getX()*2220f + " = X2220 / Z1000 = " + multiFaceLandmarks.get(0).getLandmarkList().get(133).getZ()*1000f);
+                        /*tv2.setText(leftRatioMeasurement_blink + " = LEFT Blink RIGHT = " + rightRatioMeasurement_blink);
+                        tv5.setText(leftRatioMeasurement_side1 + " = LEFT Side RIGHT = " + rightRatioMeasurement_side1);*/
+                        /*if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
                             if(eye_blinked){
                                 tv.setText("Eye is blinked");
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
@@ -242,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                                 eye_sided = true;
                                 eye_center = false;
                             }
-                        }
+                        }*/
           /*Log.v(
               TAG,
               "[TS:"
@@ -387,5 +401,13 @@ public class MainActivity extends AppCompatActivity {
         return multiFaceLandmarksStr;
     }
 
+    public static float getLandmarksAngle(Point p1, Point p2, Point p3){
+        float p1_2 = (float) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.z - p2.z, 2));
+        float p2_3 = (float) Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.z - p3.z, 2));
+        float p3_1 = (float) Math.sqrt(Math.pow(p3.x - p1.x, 2) + Math.pow(p3.z - p1.z, 2));
+        float radian = (float) Math.acos((p1_2*p1_2 + p2_3*p2_3 - p3_1*p3_1) / (2 * p1_2 * p2_3));
+        float degree = (float) (radian / Math.PI * 180);
+        return degree;
+    }
 
 }
