@@ -128,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
         tv = findViewById(R.id.tv);
-        tv2 = findViewById(R.id.tv5);
-        tv3 = findViewById(R.id.tv2);
-        tv4 = findViewById(R.id.tv3);
-        tv5 = findViewById(R.id.tv4);
+        tv2 = findViewById(R.id.tv2);
+        tv3 = findViewById(R.id.tv3);
+        tv4 = findViewById(R.id.tv4);
+        tv5 = findViewById(R.id.tv5);
         //tv.setText("000");
         try {
             applicationInfo =
