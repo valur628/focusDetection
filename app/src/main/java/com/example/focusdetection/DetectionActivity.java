@@ -73,11 +73,13 @@ public class DetectionActivity extends AppCompatActivity {
     // Handles camera access via the {@link CameraX} Jetpack support library.
     private CameraXPreviewHelper cameraHelper;
 
-    private TextView tv;
-    private TextView tv2;
-    private TextView tv3;
-    private TextView tv4;
-    private TextView tv5;
+    private TextView tv_ModeName, tv_TimerMode, tv_RestartText, tv_TimeCounter;
+    private TextView tv_WaringSearchTop, tv_WaringSearchBottom;
+    //텍스트 뷰 목록
+
+
+    private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
+    //집중력 저하 탐지 결과 아래쪽 텍스트
 
     private float leftEyePoint_blink_1, leftEyePoint_blink_2;
     //왼쪽 눈 깜빡임용 랜드마크 포인트
@@ -124,11 +126,12 @@ public class DetectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
-        tv = findViewById(R.id.tv);
-        tv2 = findViewById(R.id.tv2);
-        tv3 = findViewById(R.id.tv3);
-        tv4 = findViewById(R.id.tv4);
-        tv5 = findViewById(R.id.tv5);
+        tv_ModeName = findViewById(R.id.mode_name_id);
+        tv_TimerMode = findViewById(R.id.timer_name_id);
+        tv_RestartText = findViewById(R.id.restart_text_id);
+        tv_TimeCounter = findViewById(R.id.time_counter_id);
+        tv_WaringSearchTop = findViewById(R.id.waring_search_top_id);
+        tv_WaringSearchBottom = findViewById(R.id.waring_search_bottom_id);
         //tv.setText("000");
         try {
             applicationInfo =
@@ -291,10 +294,19 @@ public class DetectionActivity extends AppCompatActivity {
                         tv4.setText(apResult + " = apResult");
                         tv2.setText(centerHeadPoint_angle_x + " = X angle Z = " + centerHeadPoint_angle_z);*/
 
+                        if((head_side || eye_blink || iris_corner)) {
+                            tv_WaringSearchTop.setText("집중력 저하 감지");
+                        }
+                        else {
+                            tv_WaringSearchTop.setText("집중력 저하 없음");
+                        }
+
+                        tv_WaringSearchBottom.setText(waringSearchBottomText);
+                        waringSearchBottomText = "";
                         if((apResult <= 130f && (cheekRatioMeasurement_side >= 5.5f || cheekRatioMeasurement_side <= -5.5f))
                                 || (cheekRatioMeasurement_side >= 7f || cheekRatioMeasurement_side <= -7f)){
                             if(head_side){
-                                tv3.setText("고개가 돌아가 있습니다.");
+                                waringSearchBottomText += "고개가 돌아감, ";
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
                                 head_side = false;
                                 head_middle = true;
@@ -303,7 +315,7 @@ public class DetectionActivity extends AppCompatActivity {
                         else{
                             if(head_middle)
                             {
-                                tv3.setText("고개가 중앙에 있습니다.");
+                                waringSearchBottomText += "고개가 중앙임, ";
                                 //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
                                 head_side = true;
                                 head_middle = false;
@@ -312,8 +324,7 @@ public class DetectionActivity extends AppCompatActivity {
 
                         if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
                             if(eye_blink){
-                                tv2.setText("눈이 감겨 있습니다.");
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
+                                waringSearchBottomText += "눈이 감겼음, ";
                                 eye_blink = false;
                                 eye_open = true;
                             }
@@ -321,8 +332,7 @@ public class DetectionActivity extends AppCompatActivity {
                         else{
                             if(eye_open)
                             {
-                                tv2.setText("눈이 떠져 있습니다.");
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
+                                waringSearchBottomText += "눈이 떠졌음, ";
                                 eye_blink = true;
                                 eye_open = false;
                             }
@@ -331,8 +341,7 @@ public class DetectionActivity extends AppCompatActivity {
                         if((-0.30 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.30)
                                 && (-0.30  > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.30)){
                             if(iris_corner){
-                                tv.setText("눈동자가 한 쪽으로 쏠렸습니다.");
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
+                                waringSearchBottomText += "눈동자가 쏠림";
                                 iris_corner = false;
                                 iris_center = true;
                             }
@@ -340,8 +349,7 @@ public class DetectionActivity extends AppCompatActivity {
                         else{
                             if(iris_center)
                             {
-                                tv.setText("눈동자가 가운데에 있습니다.");
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
+                                waringSearchBottomText += "눈동자가 가운데임";
                                 iris_corner = true;
                                 iris_center = false;
                             }

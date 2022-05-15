@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">집중력앱 테스트 버전</string>
-    <string name="no_camera_access" translatable="false">권한 좀 주시옵소서.</string>
+    <string name="app_name" translatable="false">집중력 앱 테스트 버전</string>
+    <string name="no_camera_access" translatable="false">카메라 인식 중...</string>
 </resources>

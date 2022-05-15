@@ -3,7 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/layout/activity_detection.xml" value="0.26979166666666665" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/drawable/detection_camera_bg.xml" value="0.2745" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/drawable/detection_dropshadow.xml" value="0.2745" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/drawable/detection_exitstop_bg.xml" value="0.2745" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/drawable/detection_timer_bg.xml" value="0.2745" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/drawable/detection_waring_bg.xml" value="0.2745" />
+        <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/layout/activity_detection.xml" value="0.5" />
         <entry key="..\:/pjcProject/androidWS/focusDetection/app/src/main/res/layout/activity_main.xml" value="0.358695652173913" />
       </map>
     </option>
