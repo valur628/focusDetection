@@ -5,6 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/time_counter_id2"
+        android:layout_width="219dp"
+        android:layout_height="119dp"
+        android:layout_gravity="center|right"
+        android:gravity="center"
+        android:paddingTop="40dp"
+        android:text="23:59:59"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        tools:layout_editor_absoluteX="195dp"
+        tools:layout_editor_absoluteY="596dp" />
+
     <Button
         android:id="@+id/toggleButton"
         android:layout_width="166dp"

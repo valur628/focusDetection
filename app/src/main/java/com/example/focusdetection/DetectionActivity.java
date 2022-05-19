@@ -2,6 +2,8 @@ package com.example.focusdetection;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 
@@ -31,9 +33,12 @@ import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.framework.Packet;
 import com.google.mediapipe.glutil.EglManager;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DetectionActivity extends AppCompatActivity {
     private static final String TAG = "DetectionActivity";
@@ -73,10 +78,35 @@ public class DetectionActivity extends AppCompatActivity {
     // Handles camera access via the {@link CameraX} Jetpack support library.
     private CameraXPreviewHelper cameraHelper;
 
+    //private static Handler mHandler ;
+    //스레드 용 핸들러
+
     private TextView tv_ModeName, tv_TimerMode, tv_RestartText, tv_TimeCounter;
     private TextView tv_WaringSearchTop, tv_WaringSearchBottom;
     //텍스트 뷰 목록
 
+    private boolean startDialogCheck = true;
+    //시작 다이얼로그 확인
+
+    private int detectionModeNumber = 2;
+    //집중도 측정 모드 (1 = 약함 모드, 2 = 중간 모드, 3 = 강함 모드)
+
+    private int timer_hour, timer_minute, timer_second;
+    //글로벌 시간
+    private String text_hour, text_minute, text_second;
+    //텍스트 상의 시간
+    private String nowTime;
+    //지금 시간
+    private int totalTime;
+    //전체 시간
+
+    private String timerNameDB;
+    //템플릿 타이머 이름
+    private String SetTimeDB = "0:1:11";
+    //템플릿 타이머 시간 (시간:분:초)
+    private String[] divideTime;
+    //문자열에서 분할된 시간
+    private Timer timer = new Timer();
 
     private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
     //집중력 저하 탐지 결과 아래쪽 텍스트
@@ -129,10 +159,13 @@ public class DetectionActivity extends AppCompatActivity {
         tv_ModeName = findViewById(R.id.mode_name_id);
         tv_TimerMode = findViewById(R.id.timer_name_id);
         tv_RestartText = findViewById(R.id.restart_text_id);
-        tv_TimeCounter = findViewById(R.id.time_counter_id);
         tv_WaringSearchTop = findViewById(R.id.waring_search_top_id);
         tv_WaringSearchBottom = findViewById(R.id.waring_search_bottom_id);
         //tv.setText("000");
+        if (startDialogCheck) {
+            startDialog();
+            startDialogCheck = false;
+        }
         try {
             applicationInfo =
                     getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
@@ -184,7 +217,6 @@ public class DetectionActivity extends AppCompatActivity {
         ap3.x = 540f;
         ap3.z = 1080f;
         //tv.setText("00000");
-
         // To show verbose logging, run:
         // adb shell setprop log.tag.MainActivity VERBOSE
 
@@ -193,57 +225,67 @@ public class DetectionActivity extends AppCompatActivity {
             processor.addPacketCallback(
                     OUTPUT_LANDMARKS_STREAM_NAME,
                     (packet) -> {
-                        //tv.setText("22222");
+                        tv_WaringSearchBottom.setText("1");
 
                         //Log.v(TAG, "Received multi face landmarks packet.");
                         List<NormalizedLandmarkList> multiFaceLandmarks =
                                 PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
 
-                        //tv.setText("33333");
+                        tv_WaringSearchBottom.setText("2");
                         ratioPoint_1a = multiFaceLandmarks.get(0).getLandmarkList().get(5).getY() * 1920f;
                         ratioPoint_1b = multiFaceLandmarks.get(0).getLandmarkList().get(4).getY() * 1920f;
 
-                        //tv.setText("44444");
+                        tv_WaringSearchBottom.setText("3");
                         leftEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(386).getY() * 1920f;
                         leftEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(373).getY() * 1920f;
                         rightEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(159).getY() * 1920f;
                         rightEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(144).getY() * 1920f;
 
-                        //tv.setText("55555");
+                        tv_WaringSearchBottom.setText("4");
                         leftRatioMeasurement_blink = (leftEyePoint_blink_2 - leftEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
                         rightRatioMeasurement_blink = (rightEyePoint_blink_2 - rightEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
 
+                        tv_WaringSearchBottom.setText("5");
                         ratioPoint_2a = multiFaceLandmarks.get(0).getLandmarkList().get(275).getY() * 1080f;
                         ratioPoint_2b = multiFaceLandmarks.get(0).getLandmarkList().get(45).getY() * 1080f;
 
+                        tv_WaringSearchBottom.setText("6");
                         leftIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(374).getX() * 1080f;
                         leftIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(475).getX() * 1080f;
                         leftIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(263).getX() * 1080f;
 
+                        tv_WaringSearchBottom.setText("7");
                         rightIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(145).getX() * 1080f;
                         rightIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(470).getX() * 1080f;
                         rightIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(133).getX() * 1080f;
 
+                        tv_WaringSearchBottom.setText("8");
                         leftRatioMeasurement_corner1 = (leftIrisPoint_side_2 - leftIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a); // (ratioPoint_2a - ratioPoint_2b);
                         leftRatioMeasurement_corner2 = (leftIrisPoint_side_3 - leftIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
+                        tv_WaringSearchBottom.setText("9");
                         rightRatioMeasurement_corner1 = (rightIrisPoint_side_2 - rightIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
                         rightRatioMeasurement_corner2 = (rightIrisPoint_side_3 - rightIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
 
+                        tv_WaringSearchBottom.setText("10");
                         rightCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() * 1080f;
                         leftCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ() * 1080f;
                         cheekRatioMeasurement_side = (rightCheekPoint_side_1 - leftCheekPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
 
+                        tv_WaringSearchBottom.setText("11");
                         centerHeadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(4).getX() * 1080f;
                         centerHeadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(4).getZ() * 1080f);
 
+                        tv_WaringSearchBottom.setText("12");
                         centerForeheadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(9).getX() * 1080f;
                         centerForeheadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(9).getZ() * 1080f);
 
+                        tv_WaringSearchBottom.setText("13");
                         ap2.x = centerHeadPoint_angle_x;
                         ap2.z = centerHeadPoint_angle_z;
 
+                        tv_WaringSearchBottom.setText("14");
                         if (cheekRatioMeasurement_side >= 0f) {
                             if (centerForeheadPoint_angle_x >= 0f && centerForeheadPoint_angle_x <= 270f) {
                                 ap1.x = 270f;
@@ -264,8 +306,9 @@ public class DetectionActivity extends AppCompatActivity {
                             } else {
                                 apResult = -1f;
                             }
+                            tv_WaringSearchBottom.setText("15-1");
                         }
-                        else if(cheekRatioMeasurement_side < 0f){
+                        else if (cheekRatioMeasurement_side < 0f) {
                             if (centerForeheadPoint_angle_x <= 1080f && centerForeheadPoint_angle_x >= 810f) {
                                 ap1.x = 810f;
                                 ap3.x = 810f;
@@ -285,75 +328,61 @@ public class DetectionActivity extends AppCompatActivity {
                             } else {
                                 apResult = -1f;
                             }
+                            tv_WaringSearchBottom.setText("15-2");
                         }
                         //180이 최대값
 
-                        /*tv.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ());
-                        tv5.setText(multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() * 1080f + " = 50 / 280 = " + multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ() * 1080f);
-                        tv3.setText(cheekRatioMeasurement_side + " = minus");
-                        tv4.setText(apResult + " = apResult");
-                        tv2.setText(centerHeadPoint_angle_x + " = X angle Z = " + centerHeadPoint_angle_z);*/
-
-                        if((head_side || eye_blink || iris_corner)) {
-                            tv_WaringSearchTop.setText("집중력 저하 감지");
+                        tv_WaringSearchBottom.setText("16");
+                        if ((apResult <= 130f && (cheekRatioMeasurement_side >= 5.5f || cheekRatioMeasurement_side <= -5.5f))
+                                || (cheekRatioMeasurement_side >= 7f || cheekRatioMeasurement_side <= -7f)) {
+                            if (head_side) {
+                                //waringSearchBottomText = "고개가 돌아감, ";
+                                tv_WaringSearchTop.setText("집중력 저하 감지");
+                                head_side = false;
+                            }
+                            tv_WaringSearchBottom.setText("17-1");
                         }
                         else {
+                            //waringSearchBottomText = "고개가 중앙임, ";
                             tv_WaringSearchTop.setText("집중력 저하 없음");
+                            head_side = true;
+                            tv_WaringSearchBottom.setText("17-2");
                         }
 
-                        tv_WaringSearchBottom.setText(waringSearchBottomText);
-                        waringSearchBottomText = "";
-                        if((apResult <= 130f && (cheekRatioMeasurement_side >= 5.5f || cheekRatioMeasurement_side <= -5.5f))
-                                || (cheekRatioMeasurement_side >= 7f || cheekRatioMeasurement_side <= -7f)){
-                            if(head_side){
-                                waringSearchBottomText += "고개가 돌아감, ";
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_close));
-                                head_side = false;
-                                head_middle = true;
-                            }
-                        }
-                        else{
-                            if(head_middle)
-                            {
-                                waringSearchBottomText += "고개가 중앙임, ";
-                                //imgv.setImageDrawable(this.getResources().getDrawable(R.drawable.eyes_open));
-                                head_side = true;
-                                head_middle = false;
-                            }
-                        }
-
-                        if(leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41){
-                            if(eye_blink){
-                                waringSearchBottomText += "눈이 감겼음, ";
+                        tv_WaringSearchBottom.setText("18");
+                        if (leftRatioMeasurement_blink < 0.41 || rightRatioMeasurement_blink < 0.41) {
+                            if (eye_blink) {
+                                //waringSearchBottomText += "눈이 감겼음, ";
+                                tv_WaringSearchTop.setText("집중력 저하 감지");
                                 eye_blink = false;
-                                eye_open = true;
                             }
+                            tv_WaringSearchBottom.setText("19-1");
                         }
-                        else{
-                            if(eye_open)
-                            {
-                                waringSearchBottomText += "눈이 떠졌음, ";
-                                eye_blink = true;
-                                eye_open = false;
-                            }
+                        else {
+                            //waringSearchBottomText += "눈이 떠졌음, ";
+                            tv_WaringSearchTop.setText("집중력 저하 없음");
+                            eye_blink = true;
+                            tv_WaringSearchBottom.setText("19-2");
                         }
 
-                        if((-0.30 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.30)
-                                && (-0.30  > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.30)){
-                            if(iris_corner){
-                                waringSearchBottomText += "눈동자가 쏠림";
+                        tv_WaringSearchBottom.setText("20");
+                        if ((-0.30 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.30)
+                                && (-0.30 > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.30)) {
+                            if (iris_corner) {
+                                //waringSearchBottomText += "눈동자가 쏠림";
+                                tv_WaringSearchTop.setText("집중력 저하 감지");
                                 iris_corner = false;
-                                iris_center = true;
                             }
+                            tv_WaringSearchBottom.setText("21-1");
                         }
-                        else{
-                            if(iris_center)
-                            {
-                                waringSearchBottomText += "눈동자가 가운데임";
-                                iris_corner = true;
-                                iris_center = false;
-                            }
+                        else {
+                            //waringSearchBottomText += "눈동자가 가운데임";
+                            tv_WaringSearchTop.setText("집중력 저하 없음");
+                            iris_corner = true;
+                            tv_WaringSearchBottom.setText("21-2");
                         }
+                        //tv_WaringSearchBottom.setText(waringSearchBottomText);
+                        //화면 크기 바뀌면서 전반적인 값 틀어진 것 같음
           /*Log.v(
               TAG,
               "[TS:"
@@ -507,4 +536,83 @@ public class DetectionActivity extends AppCompatActivity {
         return degree;
     }
 
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            // 반복실행할 구문
+
+            // 0초 이상이면
+            if (timer_second != 0) {
+                //1초씩 감소
+                timer_second--;
+
+                // 0분 이상이면
+            } else if (timer_minute != 0) {
+                // 1분 = 60초
+                timer_second = 60;
+                timer_second--;
+                timer_minute--;
+
+                // 0시간 이상이면
+            } else if (timer_hour != 0) {
+                // 1시간 = 60분
+                timer_second = 60;
+                timer_minute = 60;
+                timer_second--;
+                timer_minute--;
+                timer_hour--;
+            }
+
+            //시, 분, 초가 10이하(한자리수) 라면
+            // 숫자 앞에 0을 붙인다 ( 8 -> 08 )
+            if (timer_second <= 9) {
+                text_second = "0" + timer_second;
+            } else {
+                text_second = Integer.toString(timer_second);
+            }
+
+            if (timer_minute <= 9) {
+                text_minute = "0" + timer_minute;
+            } else {
+                text_minute = Integer.toString(timer_minute);
+            }
+
+            if (timer_hour <= 9) {
+                text_hour = "0" + timer_hour;
+            } else {
+                text_hour = Integer.toString(timer_minute);
+            }
+            nowTime = text_hour + ":" + text_minute + ":" + text_second;
+            tv_TimeCounter.setText(nowTime);
+            // 시분초가 다 0이라면 toast를 띄우고 타이머를 종료한다..
+            if (timer_hour == 0 && timer_minute == 0 && timer_second == 1) {
+                //timerTask.cancel();//타이머 종료
+                //timer.cancel();//타이머 종료
+                //timer.purge();//타이머 종료
+                //중간에 잠시 멈추는 건 타이머를 죽이는 게 아니라 타이머를 보기로만 잠시 멈춰두고 다시 시작할 때 시간을 새로 갱신
+            }
+        }
+    };
+
+    private void startDialog() {
+        tv_TimeCounter = findViewById(R.id.time_counter_id);
+        //이건 자르던지 바꾸던지 하셈
+        AlertDialog.Builder msgBuilder = new AlertDialog.Builder(DetectionActivity.this)
+                .setTitle("시작 전 준비")
+                .setMessage("하단의 확인 버튼을 누르고 나서 정확히 10초 뒤에 집중력 감지가 실행됩니다. 10초 타이머가 흘러가는 순간부터 공부를 진행해주시면 됩니다.")
+                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        divideTime = SetTimeDB.split(":");
+                        timer_hour = Integer.parseInt(divideTime[0]);
+                        timer_minute = Integer.parseInt(divideTime[1]);
+                        timer_second = Integer.parseInt(divideTime[2]);
+                        totalTime = ((((timer_hour * 60) + timer_minute) * 60) + timer_second) * 1000;
+                        timer.scheduleAtFixedRate(timerTask, 5000, 1000); //Timer 실행
+                    }
+                });
+        AlertDialog msgDlg = msgBuilder.create();
+        msgDlg.show();
+    }
 }

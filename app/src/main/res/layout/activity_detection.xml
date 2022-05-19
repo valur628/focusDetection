@@ -170,10 +170,11 @@
                         android:textColor="#FB608F"
                         android:textSize="12sp" />
                 </LinearLayout>
+
                 <TextView
                     android:id="@+id/waring_search_bottom_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="292dp"
+                    android:layout_height="31dp"
                     android:layout_marginLeft="50dp"
                     android:layout_marginTop="3dp"
                     android:text="집중력 저하를 감지 중입니다..."
@@ -195,12 +196,6 @@
             android:layout_marginBottom="20dp"
             android:layout_weight="1">
 
-            <FrameLayout
-                android:id="@+id/preview_display_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center" />
-
             <TextView
                 android:id="@+id/no_camera_access_view"
                 android:layout_width="match_parent"
@@ -209,11 +204,18 @@
                 android:text="@string/no_camera_access"
                 android:textAlignment="center" />
 
+            <FrameLayout
+                android:id="@+id/preview_display_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center" />
+
             <View
                 android:id="@+id/camera_bg_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/detection_camera_bg" />
+
         </FrameLayout>
 
         <FrameLayout
