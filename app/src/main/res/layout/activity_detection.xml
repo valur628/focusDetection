@@ -163,12 +163,12 @@
 
                     <TextView
                         android:id="@+id/waring_search_top_id"
-                        android:layout_width="wrap_content"
+                        android:layout_width="292dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:text="정상적으로 집중하고 있습니다."
                         android:textColor="#FB608F"
-                        android:textSize="12sp" />
+                        android:textSize="8sp" />
                 </LinearLayout>
 
                 <TextView
@@ -191,7 +191,8 @@
         </FrameLayout>
 
         <FrameLayout
-            android:layout_width="match_parent"
+            android:id="@+id/preview_display_layout"
+            android:layout_width="361dp"
             android:layout_height="638dp"
             android:layout_marginBottom="20dp"
             android:layout_weight="1">
@@ -205,7 +206,6 @@
                 android:textAlignment="center" />
 
             <FrameLayout
-                android:id="@+id/preview_display_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center" />
@@ -218,31 +218,20 @@
 
         </FrameLayout>
 
-        <FrameLayout
+        <Button
+            android:id="@+id/button"
             android:layout_width="match_parent"
             android:layout_height="414dp"
+            android:layout_gravity="center"
             android:layout_marginBottom="20dp"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/exitstop_button_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:letterSpacing="0.02"
-                android:text="공부 완전 종료"
-                android:textColor="#C08FFF"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <View
-                android:id="@+id/exitstop_bg_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/detection_exitstop_bg" />
-
-        </FrameLayout>
+            android:layout_weight="1"
+            android:gravity="center"
+            android:letterSpacing="0.02"
+            android:text="일정 완전 종료"
+            android:textColor="#C08FFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+           <!-- android:background="@drawable/detection_exitstop_bg" /> -->
     </LinearLayout>
 
 

@@ -8,26 +8,31 @@
     <TextView
         android:id="@+id/time_counter_id2"
         android:layout_width="219dp"
-        android:layout_height="119dp"
+        android:layout_height="0dp"
         android:layout_gravity="center|right"
+        android:layout_marginStart="39dp"
+        android:layout_marginTop="101dp"
+        android:layout_marginBottom="103dp"
         android:gravity="center"
         android:paddingTop="40dp"
         android:text="23:59:59"
         android:textColor="#000000"
         android:textSize="20sp"
-        tools:layout_editor_absoluteX="195dp"
-        tools:layout_editor_absoluteY="596dp" />
+        app:layout_constraintBottom_toTopOf="@+id/toggleButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/toggleButton"
         android:layout_width="166dp"
-        android:layout_height="84dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="324dp"
+        android:onClick="onClicks"
         android:text="전환"
         android:textSize="24sp"
-        android:onClick="onClicks"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/time_counter_id2"
         app:layout_constraintVertical_bias="0.499" />
 </androidx.constraintlayout.widget.ConstraintLayout>
