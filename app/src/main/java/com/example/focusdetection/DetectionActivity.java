@@ -34,7 +34,6 @@ import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.framework.Packet;
 import com.google.mediapipe.glutil.EglManager;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +79,7 @@ public class DetectionActivity extends AppCompatActivity {
     //private static Handler mHandler ;
     //스레드 용 핸들러
 
-    private TextView tv_ModeName, tv_TimerMode, tv_RestartText, tv_TimeCounter;
+    private TextView tv_ModeName, tv_TimerName, tv_RestartText, tv_TimeCounter;
     private TextView tv_WaringSearchTop, tv_WaringSearchBottom;
     //텍스트 뷰 목록
 
@@ -88,6 +87,8 @@ public class DetectionActivity extends AppCompatActivity {
     //타이머 다이얼로그 시작 확인
     private boolean startUIHandlerCheck = true;
     //ui 핸들러 시작 확인
+    private boolean tv_WaringSearchTopCheck = true;
+    //tv_WaringSearchTop UI 변경 여부
 
     private int detectionModeNumber = 2;
     //집중도 측정 모드 (1 = 약함 모드, 2 = 중간 모드, 3 = 강함 모드)
@@ -98,8 +99,12 @@ public class DetectionActivity extends AppCompatActivity {
     //텍스트 상의 시간
     private String nowTime;
     //지금 시간
-    private int totalTime;
+    private int totalTime = 0;
     //전체 시간
+    private int globalTime = 0;
+    //시작 이후의 시간
+    private int concentrationTime = 0;
+    //집중력 흐트러짐 시간
 
     private String timerNameDB;
     //템플릿 타이머 이름
@@ -158,7 +163,7 @@ public class DetectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
         tv_ModeName = findViewById(R.id.mode_name_id);
-        tv_TimerMode = findViewById(R.id.timer_name_id);
+        tv_TimerName = findViewById(R.id.timer_name_id);
         tv_RestartText = findViewById(R.id.restart_text_id);
         tv_WaringSearchTop = findViewById(R.id.waring_search_top_id);
         tv_WaringSearchBottom = findViewById(R.id.waring_search_bottom_id);
@@ -399,10 +404,20 @@ public class DetectionActivity extends AppCompatActivity {
             }
 
             if (!head_side || !eye_blink || !iris_corner) {
-                tv_WaringSearchTop.setText("집중력 저하 감지");
+                if (concentrationTime >= 10) {
+                    tv_WaringSearchTop.setText("집중력 저하 감지");
+                    tv_WaringSearchTopCheck = true;
+                }
+                if (concentrationTime <= 20) {
+                    concentrationTime++;
+                }
             }
             else {
-                tv_WaringSearchTop.setText("집중력 저하 없음");
+                    tv_WaringSearchTop.setText("집중력 저하 없음");
+                    tv_WaringSearchTopCheck = false;
+                if (concentrationTime >= 0) {
+                    concentrationTime--;
+                }
             }
 
             try {
@@ -411,6 +426,7 @@ public class DetectionActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             // 현재 작업을 OS님에게 다시 요청한다.
+            tv_TimerName.setText(Integer.toString(concentrationTime));
             tv_WaringSearchBottom.setText(waringSearchBottomText);
             ui_Handler.post(this);
         }
@@ -552,7 +568,7 @@ public class DetectionActivity extends AppCompatActivity {
         @Override
         public void run() {
             // 반복실행할 구문
-
+            globalTime++;
             // 0초 이상이면
             if (timer_second != 0) {
                 //1초씩 감소
@@ -628,3 +644,5 @@ public class DetectionActivity extends AppCompatActivity {
         msgDlg.show();
     }
 }
+
+//절전모드시 팅김
