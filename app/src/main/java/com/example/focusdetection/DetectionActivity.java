@@ -340,7 +340,6 @@ public class DetectionActivity extends AppCompatActivity {
                             startUIHandlerCheck = false;
                         }
                         //180이 최대값
-                        //tv_WaringSearchBottom.setText(waringSearchBottomText);
                         //화면 크기 바뀌면서 전반적인 값 틀어진 것 같음
                     });
         }
@@ -409,6 +408,7 @@ public class DetectionActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             // 현재 작업을 OS님에게 다시 요청한다.
+            tv_WaringSearchBottom.setText(waringSearchBottomText);
             ui_Handler.post(this);
         }
     }
