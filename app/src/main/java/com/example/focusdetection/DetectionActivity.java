@@ -347,23 +347,22 @@ public class DetectionActivity extends AppCompatActivity {
 
     class ThreadClass extends Thread {
         //타이머 제외 갱신 UI 관리는 여기서
-        //@Override
+        @Override
         public void run() {
             //tv_WaringSearchTop.setText(centerForeheadPoint_angle_x + "=고개측도 고개각도=" + apResult);
             //tv_WaringSearchBottom.setText(cheekRatioMeasurement_side + "=고개지수 오른눈동자=" + rightRatioMeasurement_corner1);
             tv_ModeName.setText("16");
+            waringSearchBottomText = "";
             if ((apResult <= 130f && (cheekRatioMeasurement_side >= 5f || cheekRatioMeasurement_side <= -5f))) {
                 //apResult가 130도 아래만 범위에 들어옴, cheekRatioMeasurement_side가 5보다 크거나 -5보다 작을 경우 고개 돌아갔는지 감지
-                if (head_side) {
-                    waringSearchBottomText = "고개가 돌아감, ";
-                    tv_WaringSearchTop.setText("집중력 저하 감지");
+                //if (head_side) {
+                    waringSearchBottomText += "고개가 돌아감, ";
                     head_side = false;
-                }
+                //}
                 tv_ModeName.setText("17-1");
             }
             else {
-                waringSearchBottomText = "고개가 중앙임, ";
-                tv_WaringSearchTop.setText("집중력 저하 없음");
+                waringSearchBottomText += "고개가 중앙임, ";
                 head_side = true;
                 tv_ModeName.setText("17-2");
             }
@@ -371,16 +370,14 @@ public class DetectionActivity extends AppCompatActivity {
             tv_ModeName.setText("18");
             if (leftRatioMeasurement_blink < 0.16 || rightRatioMeasurement_blink < 0.16) {
                 //leftRatioMeasurement_blink 미만이면 눈감김여부 감지
-                if (eye_blink) {
+                //if (eye_blink) {
                     waringSearchBottomText += "눈이 감겼음, ";
-                    tv_WaringSearchTop.setText("집중력 저하 감지");
                     eye_blink = false;
-                }
+                //}
                 tv_ModeName.setText("19-1");
             }
             else {
                 waringSearchBottomText += "눈이 떠졌음, ";
-                tv_WaringSearchTop.setText("집중력 저하 없음");
                 eye_blink = true;
                 tv_ModeName.setText("19-2");
             }
@@ -389,19 +386,25 @@ public class DetectionActivity extends AppCompatActivity {
             if ((-0.45 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.45)
                     && (-0.45 > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.45)) {
                 //RatioMeasurement_corner1가 -0.45보다 작거나 0.45보다 클때만 눈동자 쏠림 감지
-                if (iris_corner) {
+                //if (iris_corner) {
                     waringSearchBottomText += "눈동자가 쏠림";
-                    tv_WaringSearchTop.setText("집중력 저하 감지");
                     iris_corner = false;
-                }
+                //}
                 tv_ModeName.setText("21-1");
             }
             else {
                 waringSearchBottomText += "눈동자가 가운데임";
-                tv_WaringSearchTop.setText("집중력 저하 없음");
                 iris_corner = true;
                 tv_ModeName.setText("21-2");
             }
+
+            if (!head_side || !eye_blink || !iris_corner) {
+                tv_WaringSearchTop.setText("집중력 저하 감지");
+            }
+            else {
+                tv_WaringSearchTop.setText("집중력 저하 없음");
+            }
+
             try {
                 Thread.sleep(1000); // 쓰레드 슬립으로 일정 시간을 대기한다.
             } catch (InterruptedException e) {

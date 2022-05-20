@@ -168,7 +168,7 @@
                         android:layout_marginLeft="10dp"
                         android:text="정상적으로 집중하고 있습니다."
                         android:textColor="#FB608F"
-                        android:textSize="8sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <TextView
