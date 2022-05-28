@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.correctpose",
+  "applicationId": "com.example.focusDetection",
   "variantName": "release",
   "elements": [
     {
