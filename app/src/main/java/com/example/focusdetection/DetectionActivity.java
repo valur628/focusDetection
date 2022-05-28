@@ -729,4 +729,5 @@ public class DetectionActivity extends AppCompatActivity {
 }
 
 //절전모드시 팅김
+//스레드 죽이기 만들기
 //일시 정지 버튼과 완전 종료 버튼 타이머 연계
