@@ -20,7 +20,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.focusdetection.Databases.DetectionRoomDatabase;
+import com.example.focusdetection.Databases.EntityClass.ConcentrationTableEntity;
+import com.example.focusdetection.Databases.EntityClass.MeasurementTableEntity;
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmark;
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList;
 import com.google.mediapipe.components.CameraHelper;
@@ -34,6 +38,10 @@ import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.framework.Packet;
 import com.google.mediapipe.glutil.EglManager;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,13 +114,24 @@ public class DetectionActivity extends AppCompatActivity {
     private int concentrationTime = 0;
     //집중력 흐트러짐 시간
 
-    private String timerNameDB;
+    private String UseTimerNameDB = "N/A";
     //템플릿 타이머 이름
-    private String SetTimeDB = "02:07:11";
+    private String UseTimerTimeDB = "02:07:11";
     //템플릿 타이머 시간 (시간:분:초)
     private String[] divideTime;
     //문자열에서 분할된 시간
     private Timer timer = new Timer();
+
+    LocalDate nowLocalDate = LocalDate.now();
+    LocalTime nowLocalTime = LocalTime.now();
+    String formatedNowLocalTime = nowLocalDate.format(DateTimeFormatter.ofPattern("yyMMdd")) + nowLocalTime.format(DateTimeFormatter.ofPattern("HHmmss"));
+    //날짜, 시간 & 문자열에 맞게 날짜+시간 변환
+    LocalDateTime startMeasDateTime = LocalDateTime.now();
+    LocalDateTime endMeasDateTime = LocalDateTime.now();
+    //현재 측정 시간
+    LocalDateTime startConcDateTime = LocalDateTime.now();
+    LocalDateTime endConcDateTime = LocalDateTime.now();
+    //현재 집중 시간
 
     private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
     //집중력 저하 탐지 결과 아래쪽 텍스트
@@ -315,8 +334,7 @@ public class DetectionActivity extends AppCompatActivity {
                                 apResult = -1f;
                             }
                             tv_ModeName.setText("15-1");
-                        }
-                        else if (cheekRatioMeasurement_side < 0f) {
+                        } else if (cheekRatioMeasurement_side < 0f) {
                             if (centerForeheadPoint_angle_x <= 1080f && centerForeheadPoint_angle_x >= 810f) {
                                 ap1.x = 810f;
                                 ap3.x = 810f;
@@ -361,12 +379,11 @@ public class DetectionActivity extends AppCompatActivity {
             if ((apResult <= 130f && (cheekRatioMeasurement_side >= 5f || cheekRatioMeasurement_side <= -5f))) {
                 //apResult가 130도 아래만 범위에 들어옴, cheekRatioMeasurement_side가 5보다 크거나 -5보다 작을 경우 고개 돌아갔는지 감지
                 //if (head_side) {
-                    waringSearchBottomText += "고개가 돌아감, ";
-                    head_side = false;
+                waringSearchBottomText += "고개가 돌아감, ";
+                head_side = false;
                 //}
                 tv_ModeName.setText("17-1");
-            }
-            else {
+            } else {
                 waringSearchBottomText += "고개가 중앙임, ";
                 head_side = true;
                 tv_ModeName.setText("17-2");
@@ -376,12 +393,11 @@ public class DetectionActivity extends AppCompatActivity {
             if (leftRatioMeasurement_blink < 0.16 || rightRatioMeasurement_blink < 0.16) {
                 //leftRatioMeasurement_blink 미만이면 눈감김여부 감지
                 //if (eye_blink) {
-                    waringSearchBottomText += "눈이 감겼음, ";
-                    eye_blink = false;
+                waringSearchBottomText += "눈이 감겼음, ";
+                eye_blink = false;
                 //}
                 tv_ModeName.setText("19-1");
-            }
-            else {
+            } else {
                 waringSearchBottomText += "눈이 떠졌음, ";
                 eye_blink = true;
                 tv_ModeName.setText("19-2");
@@ -392,12 +408,11 @@ public class DetectionActivity extends AppCompatActivity {
                     && (-0.45 > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.45)) {
                 //RatioMeasurement_corner1가 -0.45보다 작거나 0.45보다 클때만 눈동자 쏠림 감지
                 //if (iris_corner) {
-                    waringSearchBottomText += "눈동자가 쏠림";
-                    iris_corner = false;
+                waringSearchBottomText += "눈동자가 쏠림";
+                iris_corner = false;
                 //}
                 tv_ModeName.setText("21-1");
-            }
-            else {
+            } else {
                 waringSearchBottomText += "눈동자가 가운데임";
                 iris_corner = true;
                 tv_ModeName.setText("21-2");
@@ -411,10 +426,9 @@ public class DetectionActivity extends AppCompatActivity {
                 if (concentrationTime <= 20) {
                     concentrationTime++;
                 }
-            }
-            else {
-                    tv_WaringSearchTop.setText("집중력 저하 없음");
-                    tv_WaringSearchTopCheck = false;
+            } else {
+                tv_WaringSearchTop.setText("집중력 저하 없음");
+                tv_WaringSearchTopCheck = false;
                 if (concentrationTime >= 0) {
                     concentrationTime--;
                 }
@@ -432,7 +446,47 @@ public class DetectionActivity extends AppCompatActivity {
         }
     }
 
-        protected int getContentViewLayoutResId() {
+    private void saveDataMeasurement() { //여기가 측정 시간 저장
+        String Meas_RecordNumberDB_txt = formatedNowLocalTime.trim();
+        String Meas_UseTimerNameDB_txt = UseTimerNameDB;
+        String Meas_UseTimerTimeDB_txt = UseTimerTimeDB;
+        LocalDateTime Meas_StartTimeDB_txt = startMeasDateTime;
+        endMeasDateTime = LocalDateTime.now();
+        LocalDateTime Meas_EndTimeDB_txt = endMeasDateTime;
+
+        MeasurementTableEntity modelMeasurementTable = new MeasurementTableEntity();
+        modelMeasurementTable.setMeas_RecordNumberDB(Meas_RecordNumberDB_txt);
+        modelMeasurementTable.setMeas_UseTimerNameDB(Meas_UseTimerNameDB_txt);
+        modelMeasurementTable.setMeas_UseTimerTimeDB(Meas_UseTimerTimeDB_txt);
+        modelMeasurementTable.setMeas_StartTimeDB(Meas_StartTimeDB_txt);
+        modelMeasurementTable.setMeas_EndTimeDB(Meas_EndTimeDB_txt);
+        DetectionRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().insert(modelMeasurementTable);
+        //MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll(); 이건 삭제
+
+        Toast.makeText(this, "측정 시간 저장 완료", Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void saveDataConcentration() { //여기가 감지 시간 저장
+        String Conc_RecordNumberDB_txt = formatedNowLocalTime.trim();
+        String Conc_UseTimerNameDB_txt = UseTimerNameDB;
+        String Conc_UseTimerTimeDB_txt = UseTimerTimeDB;
+        LocalDateTime Conc_StartTimeDB_txt = startConcDateTime;
+        endConcDateTime = LocalDateTime.now();
+        LocalDateTime Conc_EndTimeDB_txt = endConcDateTime;
+
+        ConcentrationTableEntity modelConcentrationTable = new ConcentrationTableEntity();
+        modelConcentrationTable.setConc_RecordNumberDB(Conc_RecordNumberDB_txt);
+        modelConcentrationTable.setConc_UseTimerNameDB(Conc_UseTimerNameDB_txt);
+        modelConcentrationTable.setConc_UseTimerTimeDB(Conc_UseTimerTimeDB_txt);
+        modelConcentrationTable.setConc_StartTimeDB(Conc_StartTimeDB_txt);
+        modelConcentrationTable.setConc_EndTimeDB(Conc_EndTimeDB_txt);
+        DetectionRoomDatabase.getDatabase(getApplicationContext()).getConcentrationTableDao().insert(modelConcentrationTable);
+        //MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll(); 이건 삭제
+
+        Toast.makeText(this, "측정 시간 저장", Toast.LENGTH_SHORT).show();
+    }
+    protected int getContentViewLayoutResId() {
         return R.layout.activity_detection;
     }
 
@@ -632,7 +686,7 @@ public class DetectionActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
-                        divideTime = SetTimeDB.split(":");
+                        divideTime = UseTimerTimeDB.split(":");
                         timer_hour = Integer.parseInt(divideTime[0]);
                         timer_minute = Integer.parseInt(divideTime[1]);
                         timer_second = Integer.parseInt(divideTime[2]);

@@ -2,8 +2,6 @@ package com.example.focusdetection;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -18,13 +16,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 
+import com.example.focusdetection.Databases.DetectionRoomDatabase;
 import com.example.focusdetection.Databases.EntityClass.*;
-import com.example.focusdetection.Databases.DaoClass.*;
-import com.example.focusdetection.Databases.Converters.*;
-import com.example.focusdetection.Databases.MeasurementRoomDatabase;
 
 /**
  * Main activity of MediaPipe example apps.
@@ -59,23 +54,36 @@ public class MainActivity extends AppCompatActivity {
 
     private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
     //집중력 저하 탐지 결과 아래쪽 텍스트
+
+    private String UseTimerNameDB = "N/A";
+    //템플릿 타이머 이름
+    private String UseTimerTimeDB = "02:07:11";
+    //템플릿 타이머 시간 (시간:분:초)
+
     LocalDate nowLocalDate = LocalDate.now();
     LocalTime nowLocalTime = LocalTime.now();
     String formatedNowLocalTime = nowLocalDate.format(DateTimeFormatter.ofPattern("yyMMdd")) + nowLocalTime.format(DateTimeFormatter.ofPattern("HHmmss"));
-    LocalDateTime currentNowDateTime = LocalDateTime.now();
+    //날짜, 시간 & 문자열에 맞게 날짜+시간 변환
+    LocalDateTime startMeasDateTime = LocalDateTime.now();
+    LocalDateTime endMeasDateTime = LocalDateTime.now();
+    //현재 측정 시간
+    LocalDateTime startConcDateTime = LocalDateTime.now();
+    LocalDateTime endConcDateTime = LocalDateTime.now();
+    //현재 집중 시간
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        saveData();
+        //saveData();
     }
     public void onClicks(View view) {
         Intent intent = new Intent(this, DetectionActivity.class);
         startActivity(intent);
         finish();
     }
-    private void saveData() { //여기가 저장
+
+    /*private void saveData() { //여기가 저장
 
         String Meas_RecordNumberDB_txt = formatedNowLocalTime.trim();
         String Meas_UseTimerDB_txt = "02:07:11".trim();
@@ -92,5 +100,5 @@ public class MainActivity extends AppCompatActivity {
         MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll();
 
         Toast.makeText(this, "Data Successfully Saved", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 }

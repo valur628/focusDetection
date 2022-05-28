@@ -21,7 +21,10 @@ public class MeasurementTableEntity {
     private String meas_RecordNumberDB;
 
     @ColumnInfo
-    private String meas_UseTimerDB;
+    private String meas_UseTimerNameDB;
+
+    @ColumnInfo
+    private String meas_UseTimerTimeDB;
 
     @ColumnInfo
     private LocalDateTime meas_StartTimeDB;
@@ -32,10 +35,11 @@ public class MeasurementTableEntity {
     public MeasurementTableEntity() {
     }
 
-    public MeasurementTableEntity(int meas_id, String meas_RecordNumber, String meas_UseTimer, LocalDateTime meas_StartTime, LocalDateTime meas_EndTime) {
+    public MeasurementTableEntity(int meas_id, String meas_RecordNumber, String meas_UseTimerName, String meas_UseTimerTime, LocalDateTime meas_StartTime, LocalDateTime meas_EndTime) {
         this.meas_id = meas_id;
         this.meas_RecordNumberDB = meas_RecordNumber;
-        this.meas_UseTimerDB = meas_UseTimer;
+        this.meas_UseTimerNameDB = meas_UseTimerName;
+        this.meas_UseTimerTimeDB = meas_UseTimerTime;
         this.meas_StartTimeDB = meas_StartTime;
         this.meas_EndTimeDB = meas_EndTime;
     }
@@ -52,9 +56,14 @@ public class MeasurementTableEntity {
         this.meas_RecordNumberDB = meas_RecordNumberDB;
     }
 
-    public String getMeas_UseTimerDB() { return meas_UseTimerDB; }
-    public void setMeas_UseTimerDB(String meas_UseTimerDB) {
-        this.meas_UseTimerDB = meas_UseTimerDB;
+    public String getMeas_UseTimerNameDB() { return meas_UseTimerNameDB; }
+    public void setMeas_UseTimerNameDB(String meas_UseTimerNameDB) {
+        this.meas_UseTimerNameDB = meas_UseTimerNameDB;
+    }
+
+    public String getMeas_UseTimerTimeDB() { return meas_UseTimerTimeDB; }
+    public void setMeas_UseTimerTimeDB(String meas_UseTimerTimeDB) {
+        this.meas_UseTimerTimeDB = meas_UseTimerTimeDB;
     }
 
     public LocalDateTime getMeas_StartTimeDB() {  return meas_StartTimeDB; }
