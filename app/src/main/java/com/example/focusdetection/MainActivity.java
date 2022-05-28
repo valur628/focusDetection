@@ -44,33 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private int totalTime;
     //전체 시간
 
-    private String timerNameDB;
-    //템플릿 타이머 이름
-    private String SetTimeDB = "0:0:12";
-    //템플릿 타이머 시간 (시간:분:초)
-    private String[] divideTime;
-    //문자열에서 분할된 시간
-    private Timer timer = new Timer();
-
-    private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
-    //집중력 저하 탐지 결과 아래쪽 텍스트
-
-    private String UseTimerNameDB = "N/A";
-    //템플릿 타이머 이름
-    private String UseTimerTimeDB = "02:07:11";
-    //템플릿 타이머 시간 (시간:분:초)
-
-    LocalDate nowLocalDate = LocalDate.now();
-    LocalTime nowLocalTime = LocalTime.now();
-    String formatedNowLocalTime = nowLocalDate.format(DateTimeFormatter.ofPattern("yyMMdd")) + nowLocalTime.format(DateTimeFormatter.ofPattern("HHmmss"));
-    //날짜, 시간 & 문자열에 맞게 날짜+시간 변환
-    LocalDateTime startMeasDateTime = LocalDateTime.now();
-    LocalDateTime endMeasDateTime = LocalDateTime.now();
-    //현재 측정 시간
-    LocalDateTime startConcDateTime = LocalDateTime.now();
-    LocalDateTime endConcDateTime = LocalDateTime.now();
-    //현재 집중 시간
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

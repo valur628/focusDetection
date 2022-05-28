@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 
@@ -121,6 +122,8 @@ public class DetectionActivity extends AppCompatActivity {
     private String[] divideTime;
     //문자열에서 분할된 시간
     private Timer timer = new Timer();
+    private boolean pauseTimerCheck = false;
+    //false = 흘러감, true = 멈춤
 
     LocalDate nowLocalDate = LocalDate.now();
     LocalTime nowLocalTime = LocalTime.now();
@@ -129,9 +132,13 @@ public class DetectionActivity extends AppCompatActivity {
     LocalDateTime startMeasDateTime = LocalDateTime.now();
     LocalDateTime endMeasDateTime = LocalDateTime.now();
     //현재 측정 시간
+    private boolean meas_check = true;
+    //측정 시간 측정해도 되는지
     LocalDateTime startConcDateTime = LocalDateTime.now();
     LocalDateTime endConcDateTime = LocalDateTime.now();
     //현재 집중 시간
+    private boolean conc_check = false;
+    //집중 시간 측정해도 되는지
 
     private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
     //집중력 저하 탐지 결과 아래쪽 텍스트
@@ -422,13 +429,24 @@ public class DetectionActivity extends AppCompatActivity {
                 if (concentrationTime >= 10) {
                     tv_WaringSearchTop.setText("집중력 저하 감지");
                     tv_WaringSearchTopCheck = true;
+                    if(conc_check) {
+                        saveDataConcentration();
+                        conc_check = false;
+                    }
+
                 }
                 if (concentrationTime <= 20) {
                     concentrationTime++;
                 }
             } else {
-                tv_WaringSearchTop.setText("집중력 저하 없음");
-                tv_WaringSearchTopCheck = false;
+                if (concentrationTime <= 5) {
+                    tv_WaringSearchTop.setText("집중력 저하 없음");
+                    tv_WaringSearchTopCheck = false;
+                    if(!conc_check) {
+                        startConcDateTime = LocalDateTime.now();
+                        conc_check = true;
+                    }
+                }
                 if (concentrationTime >= 0) {
                     concentrationTime--;
                 }
@@ -463,7 +481,7 @@ public class DetectionActivity extends AppCompatActivity {
         DetectionRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().insert(modelMeasurementTable);
         //MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll(); 이건 삭제
 
-        Toast.makeText(this, "측정 시간 저장 완료", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "측정 시간 저장", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -484,7 +502,16 @@ public class DetectionActivity extends AppCompatActivity {
         DetectionRoomDatabase.getDatabase(getApplicationContext()).getConcentrationTableDao().insert(modelConcentrationTable);
         //MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll(); 이건 삭제
 
-        Toast.makeText(this, "측정 시간 저장", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "집중 시간 저장", Toast.LENGTH_SHORT).show();
+    }
+
+
+    public void onClickExit(View view) {
+        saveDataMeasurement();
+        saveDataConcentration();
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
     protected int getContentViewLayoutResId() {
         return R.layout.activity_detection;
@@ -623,49 +650,51 @@ public class DetectionActivity extends AppCompatActivity {
         public void run() {
             // 반복실행할 구문
             globalTime++;
-            // 0초 이상이면
-            if (timer_second != 0) {
-                //1초씩 감소
-                timer_second--;
+            if(!pauseTimerCheck) {
+                // 0초 이상이면
+                if (timer_second != 0) {
+                    //1초씩 감소
+                    timer_second--;
 
-                // 0분 이상이면
-            } else if (timer_minute != 0) {
-                // 1분 = 60초
-                timer_second = 60;
-                timer_second--;
-                timer_minute--;
+                    // 0분 이상이면
+                } else if (timer_minute != 0) {
+                    // 1분 = 60초
+                    timer_second = 60;
+                    timer_second--;
+                    timer_minute--;
 
-                // 0시간 이상이면
-            } else if (timer_hour != 0) {
-                // 1시간 = 60분
-                timer_second = 60;
-                timer_minute = 60;
-                timer_second--;
-                timer_minute--;
-                timer_hour--;
+                    // 0시간 이상이면
+                } else if (timer_hour != 0) {
+                    // 1시간 = 60분
+                    timer_second = 60;
+                    timer_minute = 60;
+                    timer_second--;
+                    timer_minute--;
+                    timer_hour--;
+                }
+
+                //시, 분, 초가 10이하(한자리수) 라면
+                // 숫자 앞에 0을 붙인다 ( 8 -> 08 )
+                if (timer_second <= 9) {
+                    text_second = "0" + timer_second;
+                } else {
+                    text_second = Integer.toString(timer_second);
+                }
+
+                if (timer_minute <= 9) {
+                    text_minute = "0" + timer_minute;
+                } else {
+                    text_minute = Integer.toString(timer_minute);
+                }
+
+                if (timer_hour <= 9) {
+                    text_hour = "0" + timer_hour;
+                } else {
+                    text_hour = Integer.toString(timer_minute);
+                }
+                nowTime = text_hour + ":" + text_minute + ":" + text_second;
+                tv_TimeCounter.setText(nowTime);
             }
-
-            //시, 분, 초가 10이하(한자리수) 라면
-            // 숫자 앞에 0을 붙인다 ( 8 -> 08 )
-            if (timer_second <= 9) {
-                text_second = "0" + timer_second;
-            } else {
-                text_second = Integer.toString(timer_second);
-            }
-
-            if (timer_minute <= 9) {
-                text_minute = "0" + timer_minute;
-            } else {
-                text_minute = Integer.toString(timer_minute);
-            }
-
-            if (timer_hour <= 9) {
-                text_hour = "0" + timer_hour;
-            } else {
-                text_hour = Integer.toString(timer_minute);
-            }
-            nowTime = text_hour + ":" + text_minute + ":" + text_second;
-            tv_TimeCounter.setText(nowTime);
             // 시분초가 다 0이라면 toast를 띄우고 타이머를 종료한다..
             if (timer_hour == 0 && timer_minute == 0 && timer_second == 1) {
                 //timerTask.cancel();//타이머 종료
@@ -700,3 +729,4 @@ public class DetectionActivity extends AppCompatActivity {
 }
 
 //절전모드시 팅김
+//일시 정지 버튼과 완전 종료 버튼 타이머 연계
