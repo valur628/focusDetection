@@ -96,6 +96,9 @@ public class DetectionActivity extends AppCompatActivity {
     //ui 핸들러 시작 확인
     private boolean tv_WaringSearchTopCheck = true;
     //tv_WaringSearchTop UI 변경 여부
+    private int finalStopCheck = 0;
+    //완전 종료 대기 확인
+    //0 아무것도 아님, 1 돌입 대기, 2 돌입
 
     private int detectionModeNumber = 2;
     private String detectionModeString = "중간 모드";
@@ -117,7 +120,7 @@ public class DetectionActivity extends AppCompatActivity {
 
     private String UseTimerNameDB = "NoNameTimer";
     //템플릿 타이머 이름
-    private String UseTimerTimeDB = "00:01:36";
+    private String UseTimerTimeDB = "00:00:16";
     //템플릿 타이머 시간 (시간:분:초)
     private String[] divideTime;
     //문자열에서 분할된 시간
@@ -129,11 +132,13 @@ public class DetectionActivity extends AppCompatActivity {
     LocalTime nowLocalTime = LocalTime.now();
     String formatedNowLocalTime = nowLocalDate.format(DateTimeFormatter.ofPattern("yyMMdd")) + nowLocalTime.format(DateTimeFormatter.ofPattern("HHmmss"));
     //날짜, 시간 & 문자열에 맞게 날짜+시간 변환
+
     LocalDateTime startMeasDateTime = LocalDateTime.now();
     LocalDateTime endMeasDateTime = LocalDateTime.now();
     //현재 측정 시간
     private boolean meas_check = true;
     //측정 시간 측정해도 되는지
+
     LocalDateTime startConcDateTime = LocalDateTime.now();
     LocalDateTime endConcDateTime = LocalDateTime.now();
     //현재 집중 시간
@@ -475,10 +480,11 @@ public class DetectionActivity extends AppCompatActivity {
             }
             if(!pauseTimerCheck) {
                 if (!head_side || !eye_blink || !iris_corner) {
-                    if (concentrationTime >= 10) {
-                        tv_WaringSearchTop.setText("집중력 저하 감지");
+                    if (concentrationTime >= 8) {
+                        tv_WaringSearchTop.setText("집중력이 흐트러지고 있습니다.");
                         tv_WaringSearchTopCheck = true;
                         if (conc_check) {
+                            tv_WaringSearchTop.setText("집중력 정보 저장");
                             saveDataConcentration();
                             conc_check = false;
                         }
@@ -488,10 +494,11 @@ public class DetectionActivity extends AppCompatActivity {
                         concentrationTime++;
                     }
                 } else {
-                    if (concentrationTime <= 5) {
-                        tv_WaringSearchTop.setText("집중력 저하 없음");
+                    if (concentrationTime <= 4) {
+                        tv_WaringSearchTop.setText("정상적으로 집중하고 있습니다.");
                         tv_WaringSearchTopCheck = false;
                         if (!conc_check) {
+                            tv_WaringSearchTop.setText("집중력 시간 갱신");
                             startConcDateTime = LocalDateTime.now();
                             conc_check = true;
                         }
@@ -500,6 +507,19 @@ public class DetectionActivity extends AppCompatActivity {
                         concentrationTime--;
                     }
                 }
+            }
+
+            if(finalStopCheck == 1){
+                tv_RestartText.setText("감지 종료");
+                saveDataConcentration();
+                saveDataMeasurement();
+            }
+            if(finalStopCheck == 2 && timer_second <= 1) {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                pauseTimerCheck = true;
+                ui_HandlerCheck = false;
+                finish();
             }
 
             try {
@@ -533,6 +553,7 @@ public class DetectionActivity extends AppCompatActivity {
         //MeasurementRoomDatabase.getDatabase(getApplicationContext()).getMeasurementTableDao().deleteAll(); 이건 삭제
 
         Toast.makeText(this, "측정 시간 저장", Toast.LENGTH_SHORT).show();
+        finalStopCheck = 2;
     }
 
 
@@ -560,8 +581,10 @@ public class DetectionActivity extends AppCompatActivity {
     public void onClickExit(View view) {
         if(1 <= globalTime) {
             tv_RestartText.setText("종료 중...");
-            saveDataMeasurement();
-            saveDataConcentration();
+            if(finalStopCheck == 0) {
+                saveDataMeasurement();
+                saveDataConcentration();
+            }
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             pauseTimerCheck = true;
@@ -571,7 +594,7 @@ public class DetectionActivity extends AppCompatActivity {
     }
 
     public void onClickPause(View view) {
-        if(1 <= globalTime) {
+        if(1 <= globalTime && finalStopCheck == 0) {
             if(!pauseTimerCheck) {
                 //saveDataConcentration();
                 tv_RestartText.setText("재시작");
@@ -766,18 +789,23 @@ public class DetectionActivity extends AppCompatActivity {
                     text_hour = Integer.toString(timer_minute);
                 }
                 nowTime = text_hour + ":" + text_minute + ":" + text_second;
-                tv_TimeCounter.setText(nowTime);
+                if(finalStopCheck == 0) {
+                    tv_TimeCounter.setText(nowTime);
+                }
+                else if(finalStopCheck == 1 || finalStopCheck == 2) {
+                    tv_TimeCounter.setText(timer_second + "초 후 메인화면");
+                }
             }
-            // 시분초가 다 0이라면 toast를 띄우고 타이머를 종료한다..
+
             if (timer_hour == 0 && timer_minute == 0 && timer_second == 0) {
                 /*timerTask.cancel();//타이머 종료
                 timer.cancel();//타이머 종료
                 timer.purge();//타이머 종료*/
                 //중간에 잠시 멈추는 건 타이머를 죽이는 게 아니라 타이머를 보기로만 잠시 멈춰두고 다시 시작할 때 시간을 새로 갱신
-                tv_RestartText.setText("종료 중...");
-                saveDataMeasurement();
-                saveDataConcentration();
-                endDialog();
+                if(finalStopCheck == 0) {
+                    timer_second += 10;
+                    finalStopCheck = 1;
+                }
             }
         }
     };
@@ -803,23 +831,8 @@ public class DetectionActivity extends AppCompatActivity {
         AlertDialog msgDlg = msgBuilder.create();
         msgDlg.show();
     }
-    private void endDialog() {
-        AlertDialog.Builder msgBuilder = new AlertDialog.Builder(DetectionActivity.this)
-                .setTitle("감지 종료")
-                .setMessage("지정된 시간만큼의 감지가 종료되었습니다. 관련 정보는 안전하게 저장되었으며, 돌아가기 버튼을 눌러 메인 화면으로 돌아가시면 됩니다.")
-                .setPositiveButton("돌아가기", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(DetectionActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        pauseTimerCheck = true;
-                        ui_HandlerCheck = false;
-                        finish();
-                    }
-                });
-        AlertDialog msgDlg = msgBuilder.create();
-        msgDlg.show();
-    }
 }
 
 //절전모드시 팅김
+//타이머가 끝날시 팅김
+//왜 그런지 모르겠음, 남은 시간 문제? 코드 문제?
