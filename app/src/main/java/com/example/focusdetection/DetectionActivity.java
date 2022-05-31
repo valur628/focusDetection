@@ -85,8 +85,6 @@ public class DetectionActivity extends AppCompatActivity {
 
     Handler ui_Handler = null;
     //UI 스레드 용 핸들러
-    //private static Handler mHandler ;
-    //스레드 용 핸들러
 
     private TextView tv_ModeName, tv_TimerName, tv_RestartText, tv_TimeCounter;
     private TextView tv_WaringSearchTop, tv_WaringSearchBottom;
@@ -101,6 +99,7 @@ public class DetectionActivity extends AppCompatActivity {
 
     private int detectionModeNumber = 2;
     //집중도 측정 모드 (1 = 약함 모드, 2 = 중간 모드, 3 = 강함 모드)
+    private double[][] LandmarkJudgmentConditions = new double[3][4];
 
     private int timer_hour, timer_minute, timer_second;
     //글로벌 시간
@@ -115,9 +114,9 @@ public class DetectionActivity extends AppCompatActivity {
     private int concentrationTime = 0;
     //집중력 흐트러짐 시간
 
-    private String UseTimerNameDB = "N/A";
+    private String UseTimerNameDB = "NoNameTimer";
     //템플릿 타이머 이름
-    private String UseTimerTimeDB = "02:07:11";
+    private String UseTimerTimeDB = "09:18:36";
     //템플릿 타이머 시간 (시간:분:초)
     private String[] divideTime;
     //문자열에서 분할된 시간
@@ -174,9 +173,16 @@ public class DetectionActivity extends AppCompatActivity {
     private boolean head_side, head_middle;
     //고개 돌아갔는지 틀어졌는지 여부
 
+    //List<TimerTableEntity> TimerTemplateTableList;
+    //타이머 템플릿 DB를 받아오기 위한 리스트
+    //int TimerTemplateTableSize;
+    //타이머 템플릿 DB의 크기
+
     Point ap1 = new Point();
     Point ap2 = new Point();
     Point ap3 = new Point();
+    //감지 판별 기준용 각도 지점 3개
+
     private float apResult;
 
     class Point {
@@ -188,6 +194,13 @@ public class DetectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
+
+        //TimerTemplateTableList = TimerDatabase.getDatabase(getApplicationContext()).getTimerTableDao().getAllData();
+        //TimerTemplateTableSize = TimerTemplateTableList.size() - 1;
+        //UseTimerNameDB = TimerTemplateTableList.get(TimerTemplateTableList.size()).getTime_TimerNameDB();
+        //UseTimerTimeDB = TimerTemplateTableList.get(TimerTemplateTableList.size()).getTime_SetTimeDB();
+        //만약 이전 템플릿 선택되면 여기서 -1 없에보셈
+
         tv_ModeName = findViewById(R.id.mode_name_id);
         tv_TimerName = findViewById(R.id.timer_name_id);
         tv_RestartText = findViewById(R.id.restart_text_id);
@@ -249,6 +262,31 @@ public class DetectionActivity extends AppCompatActivity {
         ap3.x = 540f;
         ap3.z = 1080f;
         //tv.setText("00000");
+
+        if(detectionModeNumber == 1){
+            LandmarkJudgmentConditions[0][0] = 100f;
+            LandmarkJudgmentConditions[0][1] = 3.5;
+            LandmarkJudgmentConditions[0][2] = -3.5;
+            LandmarkJudgmentConditions[1][0] = 0.14;
+            LandmarkJudgmentConditions[2][0] = -0.60;
+            LandmarkJudgmentConditions[2][1] = 0.60;
+        }
+        else if(detectionModeNumber == 2){
+            LandmarkJudgmentConditions[0][0] = 120f;
+            LandmarkJudgmentConditions[0][1] = 4.5;
+            LandmarkJudgmentConditions[0][2] = -4.5;
+            LandmarkJudgmentConditions[1][0] = 0.17;
+            LandmarkJudgmentConditions[2][0] = -0.50;
+            LandmarkJudgmentConditions[2][1] = 0.50;
+        }
+        else if(detectionModeNumber == 3){
+            LandmarkJudgmentConditions[0][0] = 140f;
+            LandmarkJudgmentConditions[0][1] = 5.5;
+            LandmarkJudgmentConditions[0][2] = -5.5;
+            LandmarkJudgmentConditions[1][0] = 0.20;
+            LandmarkJudgmentConditions[2][0] = -0.40;
+            LandmarkJudgmentConditions[2][1] = 0.40;
+        }
 
         ui_Handler = new Handler();
         ThreadClass callThread = new ThreadClass();
@@ -383,7 +421,8 @@ public class DetectionActivity extends AppCompatActivity {
             //tv_WaringSearchBottom.setText(cheekRatioMeasurement_side + "=고개지수 오른눈동자=" + rightRatioMeasurement_corner1);
             tv_ModeName.setText("16");
             waringSearchBottomText = "";
-            if ((apResult <= 130f && (cheekRatioMeasurement_side >= 5f || cheekRatioMeasurement_side <= -5f))) {
+            if ((apResult <= LandmarkJudgmentConditions[0][0]
+                    && (cheekRatioMeasurement_side >= LandmarkJudgmentConditions[0][1] || -LandmarkJudgmentConditions[0][2] >= cheekRatioMeasurement_side))) {
                 //apResult가 130도 아래만 범위에 들어옴, cheekRatioMeasurement_side가 5보다 크거나 -5보다 작을 경우 고개 돌아갔는지 감지
                 //if (head_side) {
                 waringSearchBottomText += "고개가 돌아감, ";
@@ -397,7 +436,7 @@ public class DetectionActivity extends AppCompatActivity {
             }
 
             tv_ModeName.setText("18");
-            if (leftRatioMeasurement_blink < 0.16 || rightRatioMeasurement_blink < 0.16) {
+            if (leftRatioMeasurement_blink < LandmarkJudgmentConditions[1][0] || rightRatioMeasurement_blink < LandmarkJudgmentConditions[1][0]) {
                 //leftRatioMeasurement_blink 미만이면 눈감김여부 감지
                 //if (eye_blink) {
                 waringSearchBottomText += "눈이 감겼음, ";
@@ -411,8 +450,8 @@ public class DetectionActivity extends AppCompatActivity {
             }
 
             tv_ModeName.setText("20");
-            if ((-0.45 > leftRatioMeasurement_corner1 || leftRatioMeasurement_corner1 > 0.45)
-                    && (-0.45 > rightRatioMeasurement_corner1 || rightRatioMeasurement_corner1 > 0.45)) {
+            if ((leftRatioMeasurement_corner1 < LandmarkJudgmentConditions[2][0] || LandmarkJudgmentConditions[2][1] < leftRatioMeasurement_corner1)
+                    && (rightRatioMeasurement_corner1 < LandmarkJudgmentConditions[2][0] || LandmarkJudgmentConditions[2][1] < rightRatioMeasurement_corner1)) {
                 //RatioMeasurement_corner1가 -0.45보다 작거나 0.45보다 클때만 눈동자 쏠림 감지
                 //if (iris_corner) {
                 waringSearchBottomText += "눈동자가 쏠림";
@@ -507,12 +546,15 @@ public class DetectionActivity extends AppCompatActivity {
 
 
     public void onClickExit(View view) {
-        saveDataMeasurement();
-        saveDataConcentration();
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
+        if(1 <= globalTime) {
+            saveDataMeasurement();
+            saveDataConcentration();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
+
     protected int getContentViewLayoutResId() {
         return R.layout.activity_detection;
     }

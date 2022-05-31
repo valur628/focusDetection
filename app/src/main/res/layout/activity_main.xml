@@ -7,32 +7,73 @@
 
     <TextView
         android:id="@+id/time_counter_id2"
-        android:layout_width="219dp"
-        android:layout_height="0dp"
+        android:layout_width="74dp"
+        android:layout_height="89dp"
         android:layout_gravity="center|right"
-        android:layout_marginStart="39dp"
-        android:layout_marginTop="101dp"
-        android:layout_marginBottom="103dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="636dp"
         android:gravity="center"
         android:paddingTop="40dp"
         android:text="23:59:59"
         android:textColor="#000000"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/toggleButton"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/dblist_id3"
+        android:layout_width="0dp"
+        android:layout_height="564dp"
+        android:layout_gravity="center|right"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:gravity="center"
+        android:paddingTop="40dp"
+        android:text="23:59:59"
+        android:textColor="#000000"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/toggleButton3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/toggleButton"
-        android:layout_width="166dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="324dp"
+        android:layout_width="149dp"
+        android:layout_height="65dp"
         android:onClick="onClicks"
         android:text="전환"
         android:textSize="24sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/time_counter_id2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.297"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/toggleButton2"
+        android:layout_width="145dp"
+        android:layout_height="59dp"
+        android:layout_marginBottom="22dp"
+        android:onClick="onClicks2"
+        android:text="종료예시"
+        android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.909"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time_counter_id2"
-        app:layout_constraintVertical_bias="0.499" />
+        app:layout_constraintTop_toBottomOf="@+id/toggleButton3" />
+
+    <Button
+        android:id="@+id/toggleButton3"
+        android:layout_width="145dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="589dp"
+        android:layout_marginBottom="26dp"
+        android:onClick="onClicks3"
+        android:text="일시예시"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/toggleButton2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.909"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
