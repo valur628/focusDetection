@@ -98,6 +98,7 @@ public class DetectionActivity extends AppCompatActivity {
     //tv_WaringSearchTop UI 변경 여부
 
     private int detectionModeNumber = 2;
+    private String detectionModeString = "중간 모드";
     //집중도 측정 모드 (1 = 약함 모드, 2 = 중간 모드, 3 = 강함 모드)
     private double[][] LandmarkJudgmentConditions = new double[3][4];
 
@@ -270,6 +271,7 @@ public class DetectionActivity extends AppCompatActivity {
             LandmarkJudgmentConditions[1][0] = 0.14;
             LandmarkJudgmentConditions[2][0] = -0.60;
             LandmarkJudgmentConditions[2][1] = 0.60;
+            detectionModeString = "약함 모드";
         }
         else if(detectionModeNumber == 2){
             LandmarkJudgmentConditions[0][0] = 120f;
@@ -278,6 +280,7 @@ public class DetectionActivity extends AppCompatActivity {
             LandmarkJudgmentConditions[1][0] = 0.17;
             LandmarkJudgmentConditions[2][0] = -0.50;
             LandmarkJudgmentConditions[2][1] = 0.50;
+            detectionModeString = "중간 모드";
         }
         else if(detectionModeNumber == 3){
             LandmarkJudgmentConditions[0][0] = 140f;
@@ -286,7 +289,11 @@ public class DetectionActivity extends AppCompatActivity {
             LandmarkJudgmentConditions[1][0] = 0.20;
             LandmarkJudgmentConditions[2][0] = -0.40;
             LandmarkJudgmentConditions[2][1] = 0.40;
+            detectionModeString = "강함 모드";
         }
+
+        tv_ModeName.setText(detectionModeString);
+        tv_TimerName.setText(UseTimerNameDB);
 
         ui_Handler = new Handler();
         ThreadClass callThread = new ThreadClass();
@@ -297,67 +304,67 @@ public class DetectionActivity extends AppCompatActivity {
             processor.addPacketCallback(
                     OUTPUT_LANDMARKS_STREAM_NAME,
                     (packet) -> {
-                        tv_ModeName.setText("1");
+                        //tv_ModeName.setText("1");
 
                         //Log.v(TAG, "Received multi face landmarks packet.");
                         List<NormalizedLandmarkList> multiFaceLandmarks =
                                 PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
 
-                        tv_ModeName.setText("2");
+                        //tv_ModeName.setText("2");
                         ratioPoint_1a = multiFaceLandmarks.get(0).getLandmarkList().get(5).getY() * 1920f;
                         ratioPoint_1b = multiFaceLandmarks.get(0).getLandmarkList().get(4).getY() * 1920f;
 
-                        tv_ModeName.setText("3");
+                        //tv_ModeName.setText("3");
                         leftEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(386).getY() * 1920f;
                         leftEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(373).getY() * 1920f;
                         rightEyePoint_blink_1 = multiFaceLandmarks.get(0).getLandmarkList().get(159).getY() * 1920f;
                         rightEyePoint_blink_2 = multiFaceLandmarks.get(0).getLandmarkList().get(144).getY() * 1920f;
 
-                        tv_ModeName.setText("4");
+                        //tv_ModeName.setText("4");
                         leftRatioMeasurement_blink = (leftEyePoint_blink_2 - leftEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
                         rightRatioMeasurement_blink = (rightEyePoint_blink_2 - rightEyePoint_blink_1) / (ratioPoint_1b - ratioPoint_1a);
 
-                        tv_ModeName.setText("5");
+                        //tv_ModeName.setText("5");
                         ratioPoint_2a = multiFaceLandmarks.get(0).getLandmarkList().get(275).getY() * 1080f;
                         ratioPoint_2b = multiFaceLandmarks.get(0).getLandmarkList().get(45).getY() * 1080f;
 
-                        tv_ModeName.setText("6");
+                        //tv_ModeName.setText("6");
                         leftIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(374).getX() * 1080f;
                         leftIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(475).getX() * 1080f;
                         leftIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(263).getX() * 1080f;
 
-                        tv_ModeName.setText("7");
+                        //tv_ModeName.setText("7");
                         rightIrisPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(145).getX() * 1080f;
                         rightIrisPoint_side_2 = multiFaceLandmarks.get(0).getLandmarkList().get(470).getX() * 1080f;
                         rightIrisPoint_side_3 = multiFaceLandmarks.get(0).getLandmarkList().get(133).getX() * 1080f;
 
-                        tv_ModeName.setText("8");
+                        //tv_ModeName.setText("8");
                         leftRatioMeasurement_corner1 = (leftIrisPoint_side_2 - leftIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a); // (ratioPoint_2a - ratioPoint_2b);
                         leftRatioMeasurement_corner2 = (leftIrisPoint_side_3 - leftIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
-                        tv_ModeName.setText("9");
+                        //tv_ModeName.setText("9");
                         rightRatioMeasurement_corner1 = (rightIrisPoint_side_2 - rightIrisPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
                         rightRatioMeasurement_corner2 = (rightIrisPoint_side_3 - rightIrisPoint_side_2) / (ratioPoint_1b - ratioPoint_1a);
 
 
-                        tv_ModeName.setText("10");
+                        //tv_ModeName.setText("10");
                         rightCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(50).getZ() * 1080f;
                         leftCheekPoint_side_1 = multiFaceLandmarks.get(0).getLandmarkList().get(280).getZ() * 1080f;
                         cheekRatioMeasurement_side = (rightCheekPoint_side_1 - leftCheekPoint_side_1) / (ratioPoint_1b - ratioPoint_1a);
 
-                        tv_ModeName.setText("11");
+                        //tv_ModeName.setText("11");
                         centerHeadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(4).getX() * 1080f;
                         centerHeadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(4).getZ() * 1080f);
 
-                        tv_ModeName.setText("12");
+                        //tv_ModeName.setText("12");
                         centerForeheadPoint_angle_x = multiFaceLandmarks.get(0).getLandmarkList().get(9).getX() * 1080f;
                         centerForeheadPoint_angle_z = Math.abs(multiFaceLandmarks.get(0).getLandmarkList().get(9).getZ() * 1080f);
 
-                        tv_ModeName.setText("13");
+                        //tv_ModeName.setText("13");
                         ap2.x = centerHeadPoint_angle_x;
                         ap2.z = centerHeadPoint_angle_z;
 
-                        tv_ModeName.setText("14");
+                        //tv_ModeName.setText("14");
                         if (cheekRatioMeasurement_side >= 0f) {
                             if (centerForeheadPoint_angle_x >= 0f && centerForeheadPoint_angle_x <= 270f) {
                                 ap1.x = 270f;
@@ -378,7 +385,7 @@ public class DetectionActivity extends AppCompatActivity {
                             } else {
                                 apResult = -1f;
                             }
-                            tv_ModeName.setText("15-1");
+                            //tv_ModeName.setText("15-1");
                         } else if (cheekRatioMeasurement_side < 0f) {
                             if (centerForeheadPoint_angle_x <= 1080f && centerForeheadPoint_angle_x >= 810f) {
                                 ap1.x = 810f;
@@ -399,7 +406,7 @@ public class DetectionActivity extends AppCompatActivity {
                             } else {
                                 apResult = -1f;
                             }
-                            tv_ModeName.setText("15-2");
+                            //tv_ModeName.setText("15-2");
                         }
 
                         if (startUIHandlerCheck) {
@@ -419,7 +426,7 @@ public class DetectionActivity extends AppCompatActivity {
         public void run() {
             //tv_WaringSearchTop.setText(centerForeheadPoint_angle_x + "=고개측도 고개각도=" + apResult);
             //tv_WaringSearchBottom.setText(cheekRatioMeasurement_side + "=고개지수 오른눈동자=" + rightRatioMeasurement_corner1);
-            tv_ModeName.setText("16");
+            //tv_ModeName.setText("16");
             waringSearchBottomText = "";
             if ((apResult <= LandmarkJudgmentConditions[0][0]
                     && (cheekRatioMeasurement_side >= LandmarkJudgmentConditions[0][1] || -LandmarkJudgmentConditions[0][2] >= cheekRatioMeasurement_side))) {
@@ -428,28 +435,28 @@ public class DetectionActivity extends AppCompatActivity {
                 waringSearchBottomText += "고개가 돌아감, ";
                 head_side = false;
                 //}
-                tv_ModeName.setText("17-1");
+                //tv_ModeName.setText("17-1");
             } else {
                 waringSearchBottomText += "고개가 중앙임, ";
                 head_side = true;
-                tv_ModeName.setText("17-2");
+                //tv_ModeName.setText("17-2");
             }
 
-            tv_ModeName.setText("18");
+            //tv_ModeName.setText("18");
             if (leftRatioMeasurement_blink < LandmarkJudgmentConditions[1][0] || rightRatioMeasurement_blink < LandmarkJudgmentConditions[1][0]) {
                 //leftRatioMeasurement_blink 미만이면 눈감김여부 감지
                 //if (eye_blink) {
                 waringSearchBottomText += "눈이 감겼음, ";
                 eye_blink = false;
                 //}
-                tv_ModeName.setText("19-1");
+                //tv_ModeName.setText("19-1");
             } else {
                 waringSearchBottomText += "눈이 떠졌음, ";
                 eye_blink = true;
-                tv_ModeName.setText("19-2");
+                //tv_ModeName.setText("19-2");
             }
 
-            tv_ModeName.setText("20");
+            //tv_ModeName.setText("20");
             if ((leftRatioMeasurement_corner1 < LandmarkJudgmentConditions[2][0] || LandmarkJudgmentConditions[2][1] < leftRatioMeasurement_corner1)
                     && (rightRatioMeasurement_corner1 < LandmarkJudgmentConditions[2][0] || LandmarkJudgmentConditions[2][1] < rightRatioMeasurement_corner1)) {
                 //RatioMeasurement_corner1가 -0.45보다 작거나 0.45보다 클때만 눈동자 쏠림 감지
@@ -457,11 +464,11 @@ public class DetectionActivity extends AppCompatActivity {
                 waringSearchBottomText += "눈동자가 쏠림";
                 iris_corner = false;
                 //}
-                tv_ModeName.setText("21-1");
+                //tv_ModeName.setText("21-1");
             } else {
                 waringSearchBottomText += "눈동자가 가운데임";
                 iris_corner = true;
-                tv_ModeName.setText("21-2");
+                //tv_ModeName.setText("21-2");
             }
 
             if (!head_side || !eye_blink || !iris_corner) {
@@ -497,7 +504,6 @@ public class DetectionActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             // 현재 작업을 OS님에게 다시 요청한다.
-            tv_TimerName.setText(Integer.toString(concentrationTime));
             tv_WaringSearchBottom.setText(waringSearchBottomText);
             ui_Handler.post(this);
         }
@@ -554,7 +560,7 @@ public class DetectionActivity extends AppCompatActivity {
             finish();
         }
     }
-
+    
     protected int getContentViewLayoutResId() {
         return R.layout.activity_detection;
     }
