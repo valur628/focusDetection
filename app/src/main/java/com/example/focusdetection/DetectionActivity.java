@@ -137,7 +137,7 @@ public class DetectionActivity extends AppCompatActivity {
     LocalDateTime startConcDateTime = LocalDateTime.now();
     LocalDateTime endConcDateTime = LocalDateTime.now();
     //현재 집중 시간
-    private boolean conc_check = false;
+    private boolean conc_check = true;
     //집중 시간 측정해도 되는지
 
     private String waringSearchBottomText = "집중력 저하가 발견되지 않았습니다.";
@@ -475,7 +475,7 @@ public class DetectionActivity extends AppCompatActivity {
             }
             if(!pauseTimerCheck) {
                 if (!head_side || !eye_blink || !iris_corner) {
-                    if (concentrationTime >= 8) {
+                    if (concentrationTime >= 10) {
                         tv_WaringSearchTop.setText("집중력 저하 감지");
                         tv_WaringSearchTopCheck = true;
                         if (conc_check) {
@@ -488,7 +488,7 @@ public class DetectionActivity extends AppCompatActivity {
                         concentrationTime++;
                     }
                 } else {
-                    if (concentrationTime <= 4) {
+                    if (concentrationTime <= 5) {
                         tv_WaringSearchTop.setText("집중력 저하 없음");
                         tv_WaringSearchTopCheck = false;
                         if (!conc_check) {
