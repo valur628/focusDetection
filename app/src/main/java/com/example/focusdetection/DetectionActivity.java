@@ -117,7 +117,7 @@ public class DetectionActivity extends AppCompatActivity {
 
     private String UseTimerNameDB = "NoNameTimer";
     //템플릿 타이머 이름
-    private String UseTimerTimeDB = "09:18:36";
+    private String UseTimerTimeDB = "00:01:36";
     //템플릿 타이머 시간 (시간:분:초)
     private String[] divideTime;
     //문자열에서 분할된 시간
@@ -475,7 +475,7 @@ public class DetectionActivity extends AppCompatActivity {
             }
             if(!pauseTimerCheck) {
                 if (!head_side || !eye_blink || !iris_corner) {
-                    if (concentrationTime >= 10) {
+                    if (concentrationTime >= 8) {
                         tv_WaringSearchTop.setText("집중력 저하 감지");
                         tv_WaringSearchTopCheck = true;
                         if (conc_check) {
@@ -488,7 +488,7 @@ public class DetectionActivity extends AppCompatActivity {
                         concentrationTime++;
                     }
                 } else {
-                    if (concentrationTime <= 5) {
+                    if (concentrationTime <= 4) {
                         tv_WaringSearchTop.setText("집중력 저하 없음");
                         tv_WaringSearchTopCheck = false;
                         if (!conc_check) {
@@ -564,6 +564,7 @@ public class DetectionActivity extends AppCompatActivity {
             saveDataConcentration();
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            pauseTimerCheck = true;
             ui_HandlerCheck = false;
             finish();
         }
@@ -572,12 +573,12 @@ public class DetectionActivity extends AppCompatActivity {
     public void onClickPause(View view) {
         if(1 <= globalTime) {
             if(!pauseTimerCheck) {
-                saveDataConcentration();
-                tv_RestartText.setText("정지 중...");
+                //saveDataConcentration();
+                tv_RestartText.setText("재시작");
                 pauseTimerCheck = true;
             }
             else {
-                startConcDateTime = LocalDateTime.now();
+                //startConcDateTime = LocalDateTime.now();
                 tv_RestartText.setText("멈추기");
                 pauseTimerCheck = false;
             }
@@ -769,15 +770,14 @@ public class DetectionActivity extends AppCompatActivity {
             }
             // 시분초가 다 0이라면 toast를 띄우고 타이머를 종료한다..
             if (timer_hour == 0 && timer_minute == 0 && timer_second == 0) {
-                timerTask.cancel();//타이머 종료
+                /*timerTask.cancel();//타이머 종료
                 timer.cancel();//타이머 종료
-                timer.purge();//타이머 종료
+                timer.purge();//타이머 종료*/
                 //중간에 잠시 멈추는 건 타이머를 죽이는 게 아니라 타이머를 보기로만 잠시 멈춰두고 다시 시작할 때 시간을 새로 갱신
+                tv_RestartText.setText("종료 중...");
                 saveDataMeasurement();
                 saveDataConcentration();
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
-                finish();
+                endDialog();
             }
         }
     };
@@ -787,7 +787,7 @@ public class DetectionActivity extends AppCompatActivity {
         //이건 자르던지 바꾸던지 하셈
         AlertDialog.Builder msgBuilder = new AlertDialog.Builder(DetectionActivity.this)
                 .setTitle("시작 전 준비")
-                .setMessage("하단의 확인 버튼을 누르고 나서 정확히 10초 뒤에 집중력 감지가 실행됩니다. 10초 타이머가 흘러가는 순간부터 공부를 진행해주시면 됩니다.")
+                .setMessage("하단의 확인 버튼을 누르고 나서 정확히 10초 뒤에 집중력 감지가 실행됩니다. 그동안 화면 가운데에 자신의 얼굴이 오도록 위치를 조정해주시길 바랍니다.")
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -803,7 +803,23 @@ public class DetectionActivity extends AppCompatActivity {
         AlertDialog msgDlg = msgBuilder.create();
         msgDlg.show();
     }
+    private void endDialog() {
+        AlertDialog.Builder msgBuilder = new AlertDialog.Builder(DetectionActivity.this)
+                .setTitle("감지 종료")
+                .setMessage("지정된 시간만큼의 감지가 종료되었습니다. 관련 정보는 안전하게 저장되었으며, 돌아가기 버튼을 눌러 메인 화면으로 돌아가시면 됩니다.")
+                .setPositiveButton("돌아가기", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(DetectionActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        pauseTimerCheck = true;
+                        ui_HandlerCheck = false;
+                        finish();
+                    }
+                });
+        AlertDialog msgDlg = msgBuilder.create();
+        msgDlg.show();
+    }
 }
 
 //절전모드시 팅김
-//스레드 죽이기 만들기

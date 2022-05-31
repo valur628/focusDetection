@@ -101,6 +101,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+    public void onClicks2(View view) {
+        Intent intent = new Intent(this, DetectionActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void onClicks3(View view) {
+        Intent intent = new Intent(this, DetectionActivity.class);
+        startActivity(intent);
+        finish();
+    }
 /*
     public void onClicks2(View view) {
         tempViews = "";
