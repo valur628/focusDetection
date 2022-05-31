@@ -412,6 +412,7 @@ public class DetectionActivity extends AppCompatActivity {
                         }
 
                         if (1 <= globalTime && startUIHandlerCheck) {
+                            tv_RestartText.setText("멈추기");
                             ui_Handler.post(callThread);
                             // 핸들러를 통해 안드로이드 OS에게 작업을 요청
                             startUIHandlerCheck = false;

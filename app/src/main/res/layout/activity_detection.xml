@@ -120,7 +120,7 @@
                 android:gravity="center"
                 android:letterSpacing="0.02"
                 android:paddingBottom="40dp"
-                android:text="정지 하기"
+                android:text="로딩 중"
                 android:textColor="#C08FFF"
                 android:textSize="30sp" />
 
