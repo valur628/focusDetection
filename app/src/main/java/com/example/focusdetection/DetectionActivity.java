@@ -411,7 +411,7 @@ public class DetectionActivity extends AppCompatActivity {
                             //tv_ModeName.setText("15-2");
                         }
 
-                        if (startUIHandlerCheck) {
+                        if (1 <= globalTime && startUIHandlerCheck) {
                             ui_Handler.post(callThread);
                             // 핸들러를 통해 안드로이드 OS에게 작업을 요청
                             startUIHandlerCheck = false;
@@ -558,6 +558,7 @@ public class DetectionActivity extends AppCompatActivity {
 
     public void onClickExit(View view) {
         if(1 <= globalTime) {
+            tv_RestartText.setText("종료 중...");
             saveDataMeasurement();
             saveDataConcentration();
             Intent intent = new Intent(this, MainActivity.class);
@@ -576,7 +577,7 @@ public class DetectionActivity extends AppCompatActivity {
             }
             else {
                 startConcDateTime = LocalDateTime.now();
-                tv_RestartText.setText("정지 하기");
+                tv_RestartText.setText("멈추기");
                 pauseTimerCheck = false;
             }
         }
