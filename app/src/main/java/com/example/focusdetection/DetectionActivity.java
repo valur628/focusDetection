@@ -178,6 +178,8 @@ public class DetectionActivity extends AppCompatActivity {
     //타이머 템플릿 DB를 받아오기 위한 리스트
     //int TimerTemplateTableSize;
     //타이머 템플릿 DB의 크기
+    boolean ui_HandlerCheck = true;
+    //UI 스레드 체크용
 
     Point ap1 = new Point();
     Point ap2 = new Point();
@@ -297,7 +299,7 @@ public class DetectionActivity extends AppCompatActivity {
 
         ui_Handler = new Handler();
         ThreadClass callThread = new ThreadClass();
-        //UI 를 업데이트 할 쓰레드를 만들어 준다.
+        //UI 를 업데이트 할 스레드를 만들어 준다.
 
         if (Log.isLoggable(TAG, Log.WARN)) {
             //tv.setText("11111");
@@ -470,31 +472,32 @@ public class DetectionActivity extends AppCompatActivity {
                 iris_corner = true;
                 //tv_ModeName.setText("21-2");
             }
+            if(!pauseTimerCheck) {
+                if (!head_side || !eye_blink || !iris_corner) {
+                    if (concentrationTime >= 10) {
+                        tv_WaringSearchTop.setText("집중력 저하 감지");
+                        tv_WaringSearchTopCheck = true;
+                        if (conc_check) {
+                            saveDataConcentration();
+                            conc_check = false;
+                        }
 
-            if (!head_side || !eye_blink || !iris_corner) {
-                if (concentrationTime >= 10) {
-                    tv_WaringSearchTop.setText("집중력 저하 감지");
-                    tv_WaringSearchTopCheck = true;
-                    if(conc_check) {
-                        saveDataConcentration();
-                        conc_check = false;
                     }
-
-                }
-                if (concentrationTime <= 20) {
-                    concentrationTime++;
-                }
-            } else {
-                if (concentrationTime <= 5) {
-                    tv_WaringSearchTop.setText("집중력 저하 없음");
-                    tv_WaringSearchTopCheck = false;
-                    if(!conc_check) {
-                        startConcDateTime = LocalDateTime.now();
-                        conc_check = true;
+                    if (concentrationTime <= 20) {
+                        concentrationTime++;
                     }
-                }
-                if (concentrationTime >= 0) {
-                    concentrationTime--;
+                } else {
+                    if (concentrationTime <= 5) {
+                        tv_WaringSearchTop.setText("집중력 저하 없음");
+                        tv_WaringSearchTopCheck = false;
+                        if (!conc_check) {
+                            startConcDateTime = LocalDateTime.now();
+                            conc_check = true;
+                        }
+                    }
+                    if (concentrationTime >= 0) {
+                        concentrationTime--;
+                    }
                 }
             }
 
@@ -505,11 +508,13 @@ public class DetectionActivity extends AppCompatActivity {
             }
             // 현재 작업을 OS님에게 다시 요청한다.
             tv_WaringSearchBottom.setText(waringSearchBottomText);
-            ui_Handler.post(this);
+            if(ui_HandlerCheck) {
+                ui_Handler.post(this);
+            }
         }
     }
 
-    private void saveDataMeasurement() { //여기가 측정 시간 저장
+    private void saveDataMeasurement() { //여기가 측정 시간 저장, 전체
         String Meas_RecordNumberDB_txt = formatedNowLocalTime.trim();
         String Meas_UseTimerNameDB_txt = UseTimerNameDB;
         String Meas_UseTimerTimeDB_txt = UseTimerTimeDB;
@@ -530,7 +535,7 @@ public class DetectionActivity extends AppCompatActivity {
     }
 
 
-    private void saveDataConcentration() { //여기가 감지 시간 저장
+    private void saveDataConcentration() { //여기가 감지 집중 시간 저장, 일시
         String Conc_RecordNumberDB_txt = formatedNowLocalTime.trim();
         String Conc_UseTimerNameDB_txt = UseTimerNameDB;
         String Conc_UseTimerTimeDB_txt = UseTimerTimeDB;
@@ -557,10 +562,27 @@ public class DetectionActivity extends AppCompatActivity {
             saveDataConcentration();
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            ui_HandlerCheck = false;
             finish();
         }
     }
-    
+
+    public void onClickPause(View view) {
+        if(1 <= globalTime) {
+            if(!pauseTimerCheck) {
+                saveDataConcentration();
+                tv_RestartText.setText("정지 중...");
+                pauseTimerCheck = true;
+            }
+            else {
+                startConcDateTime = LocalDateTime.now();
+                tv_RestartText.setText("정지 하기");
+                pauseTimerCheck = false;
+            }
+        }
+    }
+
+
     protected int getContentViewLayoutResId() {
         return R.layout.activity_detection;
     }
@@ -744,11 +766,16 @@ public class DetectionActivity extends AppCompatActivity {
                 tv_TimeCounter.setText(nowTime);
             }
             // 시분초가 다 0이라면 toast를 띄우고 타이머를 종료한다..
-            if (timer_hour == 0 && timer_minute == 0 && timer_second == 1) {
-                //timerTask.cancel();//타이머 종료
-                //timer.cancel();//타이머 종료
-                //timer.purge();//타이머 종료
+            if (timer_hour == 0 && timer_minute == 0 && timer_second == 0) {
+                timerTask.cancel();//타이머 종료
+                timer.cancel();//타이머 종료
+                timer.purge();//타이머 종료
                 //중간에 잠시 멈추는 건 타이머를 죽이는 게 아니라 타이머를 보기로만 잠시 멈춰두고 다시 시작할 때 시간을 새로 갱신
+                saveDataMeasurement();
+                saveDataConcentration();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         }
     };
@@ -778,4 +805,3 @@ public class DetectionActivity extends AppCompatActivity {
 
 //절전모드시 팅김
 //스레드 죽이기 만들기
-//일시 정지 버튼과 완전 종료 버튼 타이머 연계

@@ -42,6 +42,14 @@
             android:layout_marginBottom="20dp"
             android:layout_weight="1">
 
+            <Button
+                android:id="@+id/pause_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="onClickPause"
+                android:background="#00FF0000"
+                tools:ignore="SpeakableTextPresentCheck" />
+
             <View
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
@@ -112,7 +120,7 @@
                 android:gravity="center"
                 android:letterSpacing="0.02"
                 android:paddingBottom="40dp"
-                android:text="재시작"
+                android:text="정지 하기"
                 android:textColor="#C08FFF"
                 android:textSize="35sp" />
 
